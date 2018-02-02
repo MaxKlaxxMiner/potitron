@@ -63,6 +63,55 @@ namespace LightScanner
       return new Tuple<int, int, int>(bestX + area / 2, bestY + area / 2, bestV);
     }
 
+    static Tuple<int, int, int> BestLight2(SimpleBitmap pic, int area)
+    {
+      int bestX = 0;
+      int bestY = 0;
+      int bestV = 0;
+      for (int y = 0; y < pic.height - area; y++)
+      {
+        int v = 0;
+        for (int x = 0; x < pic.width - area; x++)
+        {
+          if (x == 0)
+          {
+            for (int cy = 0; cy < area; cy++)
+            {
+              for (int cx = 0; cx < area; cx++)
+              {
+                int pix = pic.pixel[x + cx + (y + cy) * pic.width];
+                v += pix & 0xff;
+                v += (pix >> 8) & 0xff;
+                v += (pix >> 16) & 0xff;
+              }
+            }
+          }
+          else
+          {
+            for (int cy = 0; cy < area; cy++)
+            {
+              int pix = pic.pixel[x - 1 + (y + cy) * pic.width];
+              v -= pix & 0xff;
+              v -= (pix >> 8) & 0xff;
+              v -= (pix >> 16) & 0xff;
+              pix = pic.pixel[x + area - 1 + (y + cy) * pic.width];
+              v += pix & 0xff;
+              v += (pix >> 8) & 0xff;
+              v += (pix >> 16) & 0xff;
+            }
+          }
+
+          if (v > bestV)
+          {
+            bestX = x;
+            bestY = y;
+            bestV = v;
+          }
+        }
+      }
+      return new Tuple<int, int, int>(bestX + area / 2, bestY + area / 2, bestV);
+    }
+
     /// <summary>
     /// Testmethode zum auslesen der Helligkeit in Fotos
     /// </summary>
@@ -75,7 +124,7 @@ namespace LightScanner
 
         var simple = new SimpleBitmap(pic);
 
-        var light = BestLight(simple, 256);
+        var light = BestLight2(simple, 350);
 
         Console.WriteLine("{0} x {1} - val: {2:N0}", light.Item1, light.Item2, light.Item3);
       }
