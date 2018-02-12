@@ -107,9 +107,9 @@
       this.label5.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.label5.Location = new System.Drawing.Point(58, 83);
       this.label5.Name = "label5";
-      this.label5.Size = new System.Drawing.Size(151, 13);
+      this.label5.Size = new System.Drawing.Size(127, 13);
       this.label5.TabIndex = 5;
-      this.label5.Text = "10,01M  (= 10 010 000 Ω)";
+      this.label5.Text = "10,01M  (= 10.01 MΩ)";
       // 
       // label4
       // 
@@ -117,9 +117,9 @@
       this.label4.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.label4.Location = new System.Drawing.Point(58, 65);
       this.label4.Name = "label4";
-      this.label4.Size = new System.Drawing.Size(121, 13);
+      this.label4.Size = new System.Drawing.Size(115, 13);
       this.label4.TabIndex = 4;
-      this.label4.Text = "5,5k    (= 5 500 Ω)";
+      this.label4.Text = "5,5k    (= 5.5 kΩ)";
       // 
       // label3
       // 
