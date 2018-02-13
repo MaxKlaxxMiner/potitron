@@ -89,7 +89,7 @@
       this.label7.Name = "label7";
       this.label7.Size = new System.Drawing.Size(127, 13);
       this.label7.TabIndex = 7;
-      this.label7.Text = "219,72  (= 219.72 Ω)";
+      this.label7.Text = "219,77  (= 219.8 Ω)";
       // 
       // label6
       // 
@@ -99,7 +99,7 @@
       this.label6.Name = "label6";
       this.label6.Size = new System.Drawing.Size(127, 13);
       this.label6.TabIndex = 6;
-      this.label6.Text = "219.72  (= 219.72 Ω)";
+      this.label6.Text = "219.77  (= 219.8 Ω)";
       // 
       // label5
       // 
@@ -119,7 +119,7 @@
       this.label4.Name = "label4";
       this.label4.Size = new System.Drawing.Size(115, 13);
       this.label4.TabIndex = 4;
-      this.label4.Text = "5,5k    (= 5.5 kΩ)";
+      this.label4.Text = "5,5k    (= 5.500 kΩ)";
       // 
       // label3
       // 
@@ -129,7 +129,7 @@
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(109, 13);
       this.label3.TabIndex = 3;
-      this.label3.Text = "220     (= 220 Ω)";
+      this.label3.Text = "220     (= 220.0 Ω)";
       // 
       // label2
       // 
