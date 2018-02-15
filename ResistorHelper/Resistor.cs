@@ -1,4 +1,8 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+
 namespace ResistorHelper
 {
   /// <summary>
@@ -32,7 +36,75 @@ namespace ResistorHelper
     /// <returns>lesbare Zeichenfolge</returns>
     public override string ToString()
     {
-      return TxtValue(TackLifeOhm, valueMilliOhm) + "Ω";
+      return TxtValue(TackLifeOhm, targetMilliOhm).PadLeft(7) + "Ω (" + TxtValue(TackLifeOhm, valueMilliOhm).PadLeft(7) + "Ω)";
+    }
+
+    /// <summary>
+    /// sucht nach dem passensten Wert innerhalb einer E-Reihe
+    /// </summary>
+    /// <param name="val">Wert, welcher gesucht werden soll</param>
+    /// <param name="eValues">E-Reihe, welche verwendet werden soll</param>
+    /// <returns>fertiges fixes Ergebnis</returns>
+    static long SearchNearestEValue(long val, KeyValuePair<string, short[]> eValues)
+    {
+      long nearestValue = 0;
+      double nearestDif = 1000000.0;
+      long m = 1;
+      for (int i = 0; i < 16; i++)
+      {
+        foreach (var eV in eValues.Value)
+        {
+          long v = m * eV;
+          double dif = val < v ? v / (double)val : val / (double)v;
+          if (dif < nearestDif)
+          {
+            nearestDif = dif;
+            nearestValue = v;
+          }
+        }
+        m *= 10;
+      }
+
+      return nearestValue;
+    }
+
+    /// <summary>
+    /// liest eine Zeichenkette ein und gibt den entsprechenden Widerstandswert zurück (oder null, wenn der Wert nicht gelesen werden kann)
+    /// </summary>
+    /// <param name="val">Wert, welcher eingelesen werden soll</param>
+    /// <returns>eingelesener Wert oder null, wenn der wert nicht lesbar war</returns>
+    public static Resistor Parse(string val)
+    {
+      try
+      {
+        string number = "";
+        string prefix = "";
+
+        int p = 0;
+        val = val.Trim();
+        for (; p < val.Length; p++)
+        {
+          if (!char.IsDigit(val[p]) && val[p] != '.' && val[p] != ',') break;
+          number += val[p].ToString();
+        }
+        long result = (long)(double.Parse(number.Replace(',', '.'), CultureInfo.InvariantCulture) * 1000.0 + 0.5);
+
+        prefix = val.Substring(p, val.Length - p).ToLower().Replace("ohm", "").Replace("Ω", "").Trim();
+
+        switch (prefix)
+        {
+          case "": break;
+          case "k": result *= 1000; break;
+          case "m": result *= 1000000; break;
+          default: throw new Exception("unknown prefix \"" + prefix + "\"");
+        }
+
+        return new Resistor { valueMilliOhm = result, targetMilliOhm = SearchNearestEValue(result, EValues[3]) };
+      }
+      catch
+      {
+        return null;
+      }
     }
   }
 }

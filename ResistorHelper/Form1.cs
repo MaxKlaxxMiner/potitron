@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace ResistorHelper
 {
-  public partial class Form1 : Form
+  public sealed partial class Form1 : Form
   {
     public Form1()
     {
@@ -21,7 +21,8 @@ namespace ResistorHelper
     {
       if (e.KeyChar == '\r')
       {
-        listBox1.Items.Add(textBox1.Text);
+        var p = Resistor.Parse(textBox1.Text);
+        if (p != null) listBox1.Items.Add(p);
       }
     }
   }

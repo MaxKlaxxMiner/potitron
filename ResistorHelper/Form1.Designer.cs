@@ -1,6 +1,6 @@
 ﻿namespace ResistorHelper
 {
-  partial class Form1
+  sealed partial class Form1
   {
     /// <summary>
     /// Erforderliche Designervariable.
