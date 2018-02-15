@@ -22,7 +22,12 @@ namespace ResistorHelper
       if (e.KeyChar == '\r')
       {
         var p = Resistor.Parse(textBox1.Text);
-        if (p != null) listBox1.Items.Add(p);
+        if (p != null)
+        {
+          int insertPos = 0;
+          while (insertPos < listBox1.Items.Count && ((Resistor)listBox1.Items[insertPos]).valueMilliOhm < p.valueMilliOhm) insertPos++;
+          listBox1.Items.Insert(insertPos, p);
+        }
       }
     }
   }
