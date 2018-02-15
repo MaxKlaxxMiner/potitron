@@ -8,7 +8,7 @@ namespace ResistorHelper
   /// <summary>
   /// Struktur eines Widerstandes
   /// </summary>
-  public class Resistor : Consts
+  public sealed class Resistor : Consts
   {
     /// <summary>
     /// merkt sich den real gemessenen Widerstandswert in milli-Ohm
@@ -66,6 +66,53 @@ namespace ResistorHelper
       }
 
       return nearestValue;
+    }
+
+    /// <summary>
+    /// macht eine Zeichenfolge TSV-kompatibel
+    /// </summary>
+    /// <param name="value">Wert, welcher umgewandelt werden soll</param>
+    /// <returns>fertig umgewandelter Wert</returns>
+    static string EncodeTsvValue(string value)
+    {
+      return (value ?? "").Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t");
+    }
+
+    /// <summary>
+    /// wnadelt die Maskierungen eines TSV-Wertes wieder zurück
+    /// </summary>
+    /// <param name="value">Wert, welcher umgewandelt werden soll</param>
+    /// <returns>fertig umgewandelter Wert</returns>
+    static string DecodeTsvValue(string value)
+    {
+      return value.Replace("\\t", "\t").Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\\", "\\");
+    }
+
+    /// <summary>
+    /// gibt den Inhalt als TSV-Zeile zurück
+    /// </summary>
+    /// <returns>TSV-Inhalt</returns>
+    public string ToTsv()
+    {
+      return valueMilliOhm + "\t" + targetMilliOhm + "\t" + EncodeTsvValue(identClass) + "\t" + EncodeTsvValue(identNumber);
+    }
+
+    /// <summary>
+    /// wandelt eine TSV-Zeile in ein Datensatz um
+    /// </summary>
+    /// <param name="line">TSV-Zeile, welche umgewandelt werden soll</param>
+    /// <returns>fertiger Datensatz</returns>
+    public static Resistor FromTsv(string line)
+    {
+      var sp = line.Split('\t');
+
+      return new Resistor
+      {
+        valueMilliOhm = long.Parse(sp[0]),
+        targetMilliOhm = long.Parse(sp[1]),
+        identClass = DecodeTsvValue(sp[2]),
+        identNumber = DecodeTsvValue(sp[3])
+      };
     }
 
     /// <summary>
