@@ -1,6 +1,6 @@
 ﻿namespace ResistorHelper
 {
-  sealed partial class Form1
+  sealed partial class FormResistorHelper
   {
     /// <summary>
     /// Erforderliche Designervariable.
@@ -28,7 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.listBox1 = new System.Windows.Forms.ListBox();
+      this.listBoxResistors = new System.Windows.Forms.ListBox();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPageAdd = new System.Windows.Forms.TabPage();
       this.label9 = new System.Windows.Forms.Label();
@@ -42,24 +42,30 @@
       this.label2 = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
       this.textBoxValue = new System.Windows.Forms.TextBox();
+      this.tabPageSearch = new System.Windows.Forms.TabPage();
+      this.listBoxSearchResults = new System.Windows.Forms.ListBox();
+      this.label10 = new System.Windows.Forms.Label();
+      this.textBoxSearch = new System.Windows.Forms.TextBox();
       this.tabControl1.SuspendLayout();
       this.tabPageAdd.SuspendLayout();
+      this.tabPageSearch.SuspendLayout();
       this.SuspendLayout();
       // 
-      // listBox1
+      // listBoxResistors
       // 
-      this.listBox1.Dock = System.Windows.Forms.DockStyle.Left;
-      this.listBox1.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.listBox1.FormattingEnabled = true;
-      this.listBox1.Location = new System.Drawing.Point(0, 0);
-      this.listBox1.Name = "listBox1";
-      this.listBox1.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-      this.listBox1.Size = new System.Drawing.Size(216, 548);
-      this.listBox1.TabIndex = 0;
+      this.listBoxResistors.Dock = System.Windows.Forms.DockStyle.Left;
+      this.listBoxResistors.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.listBoxResistors.FormattingEnabled = true;
+      this.listBoxResistors.Location = new System.Drawing.Point(0, 0);
+      this.listBoxResistors.Name = "listBoxResistors";
+      this.listBoxResistors.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+      this.listBoxResistors.Size = new System.Drawing.Size(216, 548);
+      this.listBoxResistors.TabIndex = 0;
       // 
       // tabControl1
       // 
       this.tabControl1.Controls.Add(this.tabPageAdd);
+      this.tabControl1.Controls.Add(this.tabPageSearch);
       this.tabControl1.Location = new System.Drawing.Point(217, 2);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
@@ -191,25 +197,67 @@
       this.textBoxValue.TabIndex = 0;
       this.textBoxValue.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
       // 
-      // Form1
+      // tabPageSearch
+      // 
+      this.tabPageSearch.Controls.Add(this.listBoxSearchResults);
+      this.tabPageSearch.Controls.Add(this.label10);
+      this.tabPageSearch.Controls.Add(this.textBoxSearch);
+      this.tabPageSearch.Location = new System.Drawing.Point(4, 22);
+      this.tabPageSearch.Name = "tabPageSearch";
+      this.tabPageSearch.Size = new System.Drawing.Size(641, 520);
+      this.tabPageSearch.TabIndex = 1;
+      this.tabPageSearch.Text = "Search";
+      this.tabPageSearch.UseVisualStyleBackColor = true;
+      // 
+      // listBoxSearchResults
+      // 
+      this.listBoxSearchResults.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.listBoxSearchResults.FormattingEnabled = true;
+      this.listBoxSearchResults.Location = new System.Drawing.Point(9, 57);
+      this.listBoxSearchResults.Name = "listBoxSearchResults";
+      this.listBoxSearchResults.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+      this.listBoxSearchResults.Size = new System.Drawing.Size(623, 446);
+      this.listBoxSearchResults.TabIndex = 13;
+      // 
+      // label10
+      // 
+      this.label10.AutoSize = true;
+      this.label10.Location = new System.Drawing.Point(6, 15);
+      this.label10.Name = "label10";
+      this.label10.Size = new System.Drawing.Size(59, 13);
+      this.label10.TabIndex = 12;
+      this.label10.Text = "Ohm-Value";
+      // 
+      // textBoxSearch
+      // 
+      this.textBoxSearch.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.textBoxSearch.Location = new System.Drawing.Point(6, 31);
+      this.textBoxSearch.Name = "textBoxSearch";
+      this.textBoxSearch.Size = new System.Drawing.Size(237, 20);
+      this.textBoxSearch.TabIndex = 11;
+      this.textBoxSearch.TextChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
+      // 
+      // FormResistorHelper
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(865, 548);
       this.Controls.Add(this.tabControl1);
-      this.Controls.Add(this.listBox1);
-      this.Name = "Form1";
+      this.Controls.Add(this.listBoxResistors);
+      this.Name = "FormResistorHelper";
       this.Text = "ResistorHelper 0.01";
       this.tabControl1.ResumeLayout(false);
       this.tabPageAdd.ResumeLayout(false);
       this.tabPageAdd.PerformLayout();
+      this.tabPageSearch.ResumeLayout(false);
+      this.tabPageSearch.PerformLayout();
       this.ResumeLayout(false);
 
     }
 
     #endregion
 
-    private System.Windows.Forms.ListBox listBox1;
+    private System.Windows.Forms.ListBox listBoxResistors;
     private System.Windows.Forms.TabControl tabControl1;
     private System.Windows.Forms.TabPage tabPageAdd;
     private System.Windows.Forms.Label label7;
@@ -223,6 +271,10 @@
     private System.Windows.Forms.Label label9;
     private System.Windows.Forms.Label label8;
     private System.Windows.Forms.TextBox textBoxIdent;
+    private System.Windows.Forms.TabPage tabPageSearch;
+    private System.Windows.Forms.ListBox listBoxSearchResults;
+    private System.Windows.Forms.Label label10;
+    private System.Windows.Forms.TextBox textBoxSearch;
   }
 }
 

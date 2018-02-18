@@ -7,22 +7,36 @@ namespace ResistorHelper
   /// <summary>
   /// Struktur eines Widerstandes
   /// </summary>
-  public sealed class Resistor : Consts
+  public class Resistor : Consts
   {
     /// <summary>
     /// merkt sich den real gemessenen Widerstandswert in milli-Ohm
     /// </summary>
-    public long valueMilliOhm;
+    internal readonly long valueMilliOhm;
 
     /// <summary>
     /// merkt sich den Widerstandswert in milli-Ohm, welcher laut Beschriftung zutreffen sollte (z.B. nach der zugeordneter E24-Reihe)
     /// </summary>
-    public long targetMilliOhm;
+    readonly long targetMilliOhm;
 
     /// <summary>
     /// selbstgewählte Bezeichnung einer Gruppe/Klasse und Nummer des Widerstands
     /// </summary>
-    public string ident;
+    internal string ident;
+
+    /// <summary>
+    /// Konstruktor
+    /// </summary>
+    /// <param name="valueMilliOhm">echter Widerstandswert in milli-Ohm</param>
+    /// <param name="targetMilliOhm">optional: Widerstands, welcher laut Beschriftung zutreffen sollte</param>
+    /// <param name="ident">optional: selbstgewählte Bezeichnung einer Gruppe/Klasse und Nummer des Widerstands</param>
+    public Resistor(long valueMilliOhm, long targetMilliOhm = 0, string ident = null)
+    {
+      this.valueMilliOhm = valueMilliOhm;
+      if (targetMilliOhm == 0) targetMilliOhm = SearchNearestEValue(valueMilliOhm, EValues[3]);
+      this.targetMilliOhm = targetMilliOhm;
+      this.ident = ident;
+    }
 
     /// <summary>
     /// gibt den Wert als lesbare Zeichenfolge zurück
@@ -100,12 +114,7 @@ namespace ResistorHelper
     {
       var sp = line.Split('\t');
 
-      return new Resistor
-      {
-        valueMilliOhm = long.Parse(sp[0]),
-        targetMilliOhm = long.Parse(sp[1]),
-        ident = DecodeTsvValue(sp[2]),
-      };
+      return new Resistor(long.Parse(sp[0]), long.Parse(sp[1]), DecodeTsvValue(sp[2]));
     }
 
     /// <summary>
@@ -139,11 +148,51 @@ namespace ResistorHelper
           default: throw new Exception("unknown prefix \"" + prefix + "\"");
         }
 
-        return new Resistor { valueMilliOhm = result, targetMilliOhm = SearchNearestEValue(result, EValues[3]) };
+        return new Resistor(result);
       }
       catch
       {
         return null;
+      }
+    }
+
+    /// <summary>
+    /// Suchmethode, um passende Widerstände bzw. deren Kombinationen zu finden
+    /// </summary>
+    /// <param name="allResistors">Alle Widerstände, welche zur Verfügung stehen</param>
+    /// <param name="searchValue">gesuchter Widerstandswert</param>
+    /// <param name="maxError">optional: maximale Abweichung des Ergebnisses (default: 1.10 = 10 % Abweichung)</param>
+    /// <returns>Enumerable der gefundenen Ergebnisse</returns>
+    public static IEnumerable<ResistorResult> Search(Resistor[] allResistors, Resistor searchValue, double maxError = 1.10)
+    {
+      long search = searchValue.valueMilliOhm;
+      long max = (long)(search * maxError) - search;
+
+      foreach (var r in allResistors)
+      {
+        long err = Math.Abs(r.valueMilliOhm - search);
+        if (err <= max) yield return new ResistorResult(r, err);
+      }
+
+      // --- 2er Kombinationen - seriell ---
+      for (int y = 0; y < allResistors.Length - 1; y++)
+      {
+        for (int x = y + 1; x < allResistors.Length; x++)
+        {
+          long err = Math.Abs(allResistors[x].valueMilliOhm + allResistors[y].valueMilliOhm - search);
+          if (err <= max) yield return new ResistorResult(new ResistorCombined(allResistors[x], allResistors[y], true), err);
+        }
+      }
+
+      // --- 2er Kombinationen - parallel ---
+      for (int y = 0; y < allResistors.Length - 1; y++)
+      {
+        for (int x = y + 1; x < allResistors.Length; x++)
+        {
+          var c = new ResistorCombined(allResistors[x], allResistors[y], false);
+          long err = Math.Abs(c.valueMilliOhm - search);
+          if (err <= max) yield return new ResistorResult(c, err);
+        }
       }
     }
   }

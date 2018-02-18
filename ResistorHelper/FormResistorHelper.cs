@@ -1,25 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ResistorHelper
 {
-  public sealed partial class Form1 : Form
+  public sealed partial class FormResistorHelper : Form
   {
-    public Form1()
+    public FormResistorHelper()
     {
       InitializeComponent();
 
       if (File.Exists("autosave.txt"))
       {
-        listBox1.Items.AddRange(File.ReadLines("autosave.txt").Select(Resistor.FromTsv).ToArray());
+        listBoxResistors.Items.AddRange(File.ReadLines("autosave.txt").Select(Resistor.FromTsv).ToArray());
       }
     }
 
@@ -42,6 +36,9 @@ namespace ResistorHelper
       return val.Remove(val.Length - digits, digits) + number.ToString("D" + digits);
     }
 
+    /// <summary>
+    /// Enter-Taste, wenn ein neuer Widerstandwert hinzugefügt werden soll
+    /// </summary>
     void textBox1_KeyPress(object sender, KeyPressEventArgs e)
     {
       if (e.KeyChar == '\r')
@@ -52,11 +49,31 @@ namespace ResistorHelper
           p.ident = textBoxIdent.Text;
           textBoxIdent.Text = Increment(textBoxIdent.Text);
           int insertPos = 0;
-          while (insertPos < listBox1.Items.Count && ((Resistor)listBox1.Items[insertPos]).valueMilliOhm < p.valueMilliOhm) insertPos++;
-          listBox1.Items.Insert(insertPos, p);
-          AutoSave(listBox1.Items.Cast<Resistor>().ToArray());
+          while (insertPos < listBoxResistors.Items.Count && ((Resistor)listBoxResistors.Items[insertPos]).valueMilliOhm < p.valueMilliOhm) insertPos++;
+          listBoxResistors.Items.Insert(insertPos, p);
+          AutoSave(listBoxResistors.Items.Cast<Resistor>().ToArray());
         }
       }
+    }
+
+    /// <summary>
+    /// Änderung der Sucheingabe
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    void textBoxSearch_TextChanged(object sender, EventArgs e)
+    {
+      var val = Resistor.Parse(textBoxSearch.Text);
+      if (val == null) return;
+
+      var results = Resistor.Search(listBoxResistors.Items.Cast<Resistor>().ToArray(), val, 1.30).ToArray();
+
+      Array.Sort(results, (x, y) => x.errorMilliOhm.CompareTo(y.errorMilliOhm));
+
+      listBoxSearchResults.BeginUpdate();
+      listBoxSearchResults.Items.Clear();
+      listBoxSearchResults.Items.AddRange(results);
+      listBoxSearchResults.EndUpdate();
     }
   }
 }
