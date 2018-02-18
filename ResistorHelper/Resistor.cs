@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -21,14 +20,9 @@ namespace ResistorHelper
     public long targetMilliOhm;
 
     /// <summary>
-    /// selbstgewählte Bezeichnung einer Gruppe/Klasse (z.B. "2K4 (1)" für einen 10er Streifen von 2,4 kOhm Widerständen)
+    /// selbstgewählte Bezeichnung einer Gruppe/Klasse und Nummer des Widerstands
     /// </summary>
-    public string identClass;
-
-    /// <summary>
-    /// selbstgewählte Nummer/Bezeichnung innerhalb einer Klasse (z.B. "3" für 3. Widerstand eines 10er Streifens)
-    /// </summary>
-    public string identNumber;
+    public string ident;
 
     /// <summary>
     /// gibt den Wert als lesbare Zeichenfolge zurück
@@ -94,7 +88,7 @@ namespace ResistorHelper
     /// <returns>TSV-Inhalt</returns>
     public string ToTsv()
     {
-      return valueMilliOhm + "\t" + targetMilliOhm + "\t" + EncodeTsvValue(identClass) + "\t" + EncodeTsvValue(identNumber);
+      return valueMilliOhm + "\t" + targetMilliOhm + "\t" + EncodeTsvValue(ident);
     }
 
     /// <summary>
@@ -110,8 +104,7 @@ namespace ResistorHelper
       {
         valueMilliOhm = long.Parse(sp[0]),
         targetMilliOhm = long.Parse(sp[1]),
-        identClass = DecodeTsvValue(sp[2]),
-        identNumber = DecodeTsvValue(sp[3])
+        ident = DecodeTsvValue(sp[2]),
       };
     }
 
