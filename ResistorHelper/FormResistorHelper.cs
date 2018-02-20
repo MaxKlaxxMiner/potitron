@@ -17,12 +17,18 @@ namespace ResistorHelper
       if (File.Exists("autosave.txt"))
       {
         listBoxResistors.Items.AddRange(File.ReadLines("autosave.txt").Select(Resistor.FromTsv).ToArray());
+        Resistor.ResetSearchCache();
       }
     }
 
+    /// <summary>
+    /// speichert automatisch alle Widerstände
+    /// </summary>
+    /// <param name="resistors">Widerstände, welche gespeichert werden sollen</param>
     static void AutoSave(Resistor[] resistors)
     {
       File.WriteAllLines("autosave.txt", resistors.Select(x => x.ToTsv()));
+      Resistor.ResetSearchCache();
     }
 
     /// <summary>
