@@ -57,6 +57,24 @@ namespace ResistorHelper
     }
 
     /// <summary>
+    /// löscht ein oder mehrere Widerstände aus der Liste
+    /// </summary>
+    void removeToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      if (listBoxResistors.SelectedItems.Count > 0)
+      {
+        var toKill = listBoxResistors.SelectedItems.Cast<Resistor>().ToArray();
+        if (MessageBox.Show("Remove Resistors: " + toKill.Length + "\r\n" + string.Join("\r\n", toKill.Select(x => x.ToString())), "Remove Resitors", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
+        {
+          listBoxSearchResults.BeginUpdate();
+          foreach (var r in toKill) listBoxResistors.Items.Remove(r);
+          listBoxSearchResults.EndUpdate();
+          AutoSave(listBoxResistors.Items.Cast<Resistor>().ToArray());
+        }
+      }
+    }
+
+    /// <summary>
     /// Änderung der Sucheingabe
     /// </summary>
     /// <param name="sender"></param>

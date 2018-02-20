@@ -28,6 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
+      this.components = new System.ComponentModel.Container();
       this.listBoxResistors = new System.Windows.Forms.ListBox();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPageAdd = new System.Windows.Forms.TabPage();
@@ -46,13 +47,17 @@
       this.listBoxSearchResults = new System.Windows.Forms.ListBox();
       this.label10 = new System.Windows.Forms.Label();
       this.textBoxSearch = new System.Windows.Forms.TextBox();
+      this.contextMenuListBox = new System.Windows.Forms.ContextMenuStrip(this.components);
+      this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.tabControl1.SuspendLayout();
       this.tabPageAdd.SuspendLayout();
       this.tabPageSearch.SuspendLayout();
+      this.contextMenuListBox.SuspendLayout();
       this.SuspendLayout();
       // 
       // listBoxResistors
       // 
+      this.listBoxResistors.ContextMenuStrip = this.contextMenuListBox;
       this.listBoxResistors.Dock = System.Windows.Forms.DockStyle.Left;
       this.listBoxResistors.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.listBoxResistors.FormattingEnabled = true;
@@ -237,6 +242,21 @@
       this.textBoxSearch.TabIndex = 11;
       this.textBoxSearch.TextChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
       // 
+      // contextMenuListBox
+      // 
+      this.contextMenuListBox.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.removeToolStripMenuItem});
+      this.contextMenuListBox.Name = "contextMenuListBox";
+      this.contextMenuListBox.Size = new System.Drawing.Size(146, 26);
+      // 
+      // removeToolStripMenuItem
+      // 
+      this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
+      this.removeToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
+      this.removeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.removeToolStripMenuItem.Text = "&Remove";
+      this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
+      // 
       // FormResistorHelper
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -251,6 +271,7 @@
       this.tabPageAdd.PerformLayout();
       this.tabPageSearch.ResumeLayout(false);
       this.tabPageSearch.PerformLayout();
+      this.contextMenuListBox.ResumeLayout(false);
       this.ResumeLayout(false);
 
     }
@@ -275,6 +296,8 @@
     private System.Windows.Forms.ListBox listBoxSearchResults;
     private System.Windows.Forms.Label label10;
     private System.Windows.Forms.TextBox textBoxSearch;
+    private System.Windows.Forms.ContextMenuStrip contextMenuListBox;
+    private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
   }
 }
 
