@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -84,7 +85,17 @@ namespace ResistorHelper
       var val = Resistor.Parse(textBoxSearch.Text);
       if (val == null) return;
 
-      var results = Resistor.Search(listBoxResistors.Items.Cast<Resistor>().ToArray(), val, 1.30).ToArray();
+      int searchType = radioButtonSearchType1.Checked ? 1 : radioButtonSearchType2.Checked ? 2 : radioButtonSearchType3.Checked ? 3 : radioButtonSearchType4.Checked ? 4 : radioButtonSearchType5.Checked ? 5 : radioButtonSearchType6.Checked ? 6 : 0;
+      if (searchType == 0) throw new ArgumentException("searchType");
+
+      const int TargetLimit = 1000;
+
+      ResistorResult[] results = null;
+      foreach (double searchLevel in new[] { 1.000001, 1.00001, 1.0001, 1.0002, 1.0005, 1.001, 1.002, 1.005, 1.01, 1.02, 1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 9999999.9 })
+      {
+        results = Resistor.Search(listBoxResistors.Items.Cast<Resistor>().ToArray(), val, searchType, searchLevel).Take(TargetLimit).ToArray();
+        if (results.Length >= TargetLimit / 2) break; // mindestens die Hälfte an Ergebnissen erreicht?
+      }
 
       Array.Sort(results, (x, y) => x.errorMilliOhm.CompareTo(y.errorMilliOhm));
 

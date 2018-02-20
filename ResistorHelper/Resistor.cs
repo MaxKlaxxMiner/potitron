@@ -48,6 +48,15 @@ namespace ResistorHelper
     }
 
     /// <summary>
+    /// gibt den Wert als kürzere Zeichenfolge zurück (8 Zeichen Länge)
+    /// </summary>
+    /// <returns>lesbare Zeichenfolge</returns>
+    public virtual string ToStringSimple()
+    {
+      return TxtValue(TackLifeOhm, valueMilliOhm).PadLeft(7) + "Ω";
+    }
+
+    /// <summary>
     /// sucht nach dem passensten Wert innerhalb einer E-Reihe
     /// </summary>
     /// <param name="val">Wert, welcher gesucht werden soll</param>
@@ -161,9 +170,10 @@ namespace ResistorHelper
     /// </summary>
     /// <param name="allResistors">Alle Widerstände, welche zur Verfügung stehen</param>
     /// <param name="searchValue">gesuchter Widerstandswert</param>
+    /// <param name="maxResistors">optional: gibt die maximale Anzahl der kombinierbaren Widerstände an, welche verwendet werden dürfen (default: 2)</param>
     /// <param name="maxError">optional: maximale Abweichung des Ergebnisses (default: 1.10 = 10 % Abweichung)</param>
     /// <returns>Enumerable der gefundenen Ergebnisse</returns>
-    public static IEnumerable<ResistorResult> Search(Resistor[] allResistors, Resistor searchValue, double maxError = 1.10)
+    public static IEnumerable<ResistorResult> Search(Resistor[] allResistors, Resistor searchValue, int maxResistors = 2, double maxError = 1.10)
     {
       long search = searchValue.valueMilliOhm;
       long max = (long)(search * maxError) - search;
@@ -174,24 +184,43 @@ namespace ResistorHelper
         if (err <= max) yield return new ResistorResult(r, err);
       }
 
-      // --- 2er Kombinationen - seriell ---
-      for (int y = 0; y < allResistors.Length - 1; y++)
+      if (maxResistors >= 2) // 2-teilige Suche
       {
-        for (int x = y + 1; x < allResistors.Length; x++)
+        // --- 2er Kombinationen - seriell ---
+        for (int y = 0; y < allResistors.Length - 1; y++)
         {
-          long err = Math.Abs(allResistors[x].valueMilliOhm + allResistors[y].valueMilliOhm - search);
-          if (err <= max) yield return new ResistorResult(new ResistorCombined(allResistors[x], allResistors[y], true), err);
+          for (int x = y + 1; x < allResistors.Length; x++)
+          {
+            long err = Math.Abs(allResistors[x].valueMilliOhm + allResistors[y].valueMilliOhm - search);
+            if (err <= max) yield return new ResistorResult(new ResistorCombined(true, allResistors[x], allResistors[y]), err);
+          }
+        }
+
+        // --- 2er Kombinationen - parallel ---
+        for (int y = 0; y < allResistors.Length - 1; y++)
+        {
+          for (int x = y + 1; x < allResistors.Length; x++)
+          {
+            var c = new ResistorCombined(false, allResistors[x], allResistors[y]);
+            long err = Math.Abs(c.valueMilliOhm - search);
+            if (err <= max) yield return new ResistorResult(c, err);
+          }
         }
       }
 
-      // --- 2er Kombinationen - parallel ---
-      for (int y = 0; y < allResistors.Length - 1; y++)
+      if (maxResistors >= 3)
       {
-        for (int x = y + 1; x < allResistors.Length; x++)
+        // --- 3er Kombination - seriell ---
+        for (int z = 0; z < allResistors.Length - 2; z++)
         {
-          var c = new ResistorCombined(allResistors[x], allResistors[y], false);
-          long err = Math.Abs(c.valueMilliOhm - search);
-          if (err <= max) yield return new ResistorResult(c, err);
+          for (int y = z + 1; y < allResistors.Length - 1; y++)
+          {
+            for (int x = y + 1; x < allResistors.Length; x++)
+            {
+              long err = Math.Abs(allResistors[x].valueMilliOhm + allResistors[y].valueMilliOhm + allResistors[z].valueMilliOhm - search);
+              if (err <= max) yield return new ResistorResult(new ResistorCombined(true, new ResistorCombined(true, allResistors[x], allResistors[y]), allResistors[z]), err);
+            }
+          }
         }
       }
     }

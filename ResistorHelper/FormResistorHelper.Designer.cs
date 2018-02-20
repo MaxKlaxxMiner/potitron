@@ -30,6 +30,8 @@
     {
       this.components = new System.ComponentModel.Container();
       this.listBoxResistors = new System.Windows.Forms.ListBox();
+      this.contextMenuListBox = new System.Windows.Forms.ContextMenuStrip(this.components);
+      this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.tabPageAdd = new System.Windows.Forms.TabPage();
       this.label9 = new System.Windows.Forms.Label();
@@ -44,15 +46,20 @@
       this.label1 = new System.Windows.Forms.Label();
       this.textBoxValue = new System.Windows.Forms.TextBox();
       this.tabPageSearch = new System.Windows.Forms.TabPage();
+      this.radioButtonSearchType6 = new System.Windows.Forms.RadioButton();
+      this.radioButtonSearchType5 = new System.Windows.Forms.RadioButton();
+      this.radioButtonSearchType4 = new System.Windows.Forms.RadioButton();
+      this.radioButtonSearchType3 = new System.Windows.Forms.RadioButton();
+      this.label11 = new System.Windows.Forms.Label();
+      this.radioButtonSearchType2 = new System.Windows.Forms.RadioButton();
+      this.radioButtonSearchType1 = new System.Windows.Forms.RadioButton();
       this.listBoxSearchResults = new System.Windows.Forms.ListBox();
       this.label10 = new System.Windows.Forms.Label();
       this.textBoxSearch = new System.Windows.Forms.TextBox();
-      this.contextMenuListBox = new System.Windows.Forms.ContextMenuStrip(this.components);
-      this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.contextMenuListBox.SuspendLayout();
       this.tabControl1.SuspendLayout();
       this.tabPageAdd.SuspendLayout();
       this.tabPageSearch.SuspendLayout();
-      this.contextMenuListBox.SuspendLayout();
       this.SuspendLayout();
       // 
       // listBoxResistors
@@ -67,11 +74,26 @@
       this.listBoxResistors.Size = new System.Drawing.Size(216, 548);
       this.listBoxResistors.TabIndex = 0;
       // 
+      // contextMenuListBox
+      // 
+      this.contextMenuListBox.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.removeToolStripMenuItem});
+      this.contextMenuListBox.Name = "contextMenuListBox";
+      this.contextMenuListBox.Size = new System.Drawing.Size(146, 26);
+      // 
+      // removeToolStripMenuItem
+      // 
+      this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
+      this.removeToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
+      this.removeToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+      this.removeToolStripMenuItem.Text = "&Remove";
+      this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
+      // 
       // tabControl1
       // 
       this.tabControl1.Controls.Add(this.tabPageAdd);
       this.tabControl1.Controls.Add(this.tabPageSearch);
-      this.tabControl1.Location = new System.Drawing.Point(217, 2);
+      this.tabControl1.Location = new System.Drawing.Point(222, 2);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
       this.tabControl1.Size = new System.Drawing.Size(649, 546);
@@ -204,6 +226,13 @@
       // 
       // tabPageSearch
       // 
+      this.tabPageSearch.Controls.Add(this.radioButtonSearchType6);
+      this.tabPageSearch.Controls.Add(this.radioButtonSearchType5);
+      this.tabPageSearch.Controls.Add(this.radioButtonSearchType4);
+      this.tabPageSearch.Controls.Add(this.radioButtonSearchType3);
+      this.tabPageSearch.Controls.Add(this.label11);
+      this.tabPageSearch.Controls.Add(this.radioButtonSearchType2);
+      this.tabPageSearch.Controls.Add(this.radioButtonSearchType1);
       this.tabPageSearch.Controls.Add(this.listBoxSearchResults);
       this.tabPageSearch.Controls.Add(this.label10);
       this.tabPageSearch.Controls.Add(this.textBoxSearch);
@@ -214,11 +243,88 @@
       this.tabPageSearch.Text = "Search";
       this.tabPageSearch.UseVisualStyleBackColor = true;
       // 
+      // radioButtonSearchType6
+      // 
+      this.radioButtonSearchType6.AutoSize = true;
+      this.radioButtonSearchType6.Location = new System.Drawing.Point(407, 31);
+      this.radioButtonSearchType6.Name = "radioButtonSearchType6";
+      this.radioButtonSearchType6.Size = new System.Drawing.Size(48, 17);
+      this.radioButtonSearchType6.TabIndex = 20;
+      this.radioButtonSearchType6.Text = "hexa";
+      this.radioButtonSearchType6.UseVisualStyleBackColor = true;
+      this.radioButtonSearchType6.CheckedChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
+      // 
+      // radioButtonSearchType5
+      // 
+      this.radioButtonSearchType5.AutoSize = true;
+      this.radioButtonSearchType5.Location = new System.Drawing.Point(349, 31);
+      this.radioButtonSearchType5.Name = "radioButtonSearchType5";
+      this.radioButtonSearchType5.Size = new System.Drawing.Size(52, 17);
+      this.radioButtonSearchType5.TabIndex = 19;
+      this.radioButtonSearchType5.Text = "penta";
+      this.radioButtonSearchType5.UseVisualStyleBackColor = true;
+      this.radioButtonSearchType5.CheckedChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
+      // 
+      // radioButtonSearchType4
+      // 
+      this.radioButtonSearchType4.AutoSize = true;
+      this.radioButtonSearchType4.Location = new System.Drawing.Point(294, 31);
+      this.radioButtonSearchType4.Name = "radioButtonSearchType4";
+      this.radioButtonSearchType4.Size = new System.Drawing.Size(49, 17);
+      this.radioButtonSearchType4.TabIndex = 18;
+      this.radioButtonSearchType4.Text = "quad";
+      this.radioButtonSearchType4.UseVisualStyleBackColor = true;
+      this.radioButtonSearchType4.CheckedChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
+      // 
+      // radioButtonSearchType3
+      // 
+      this.radioButtonSearchType3.AutoSize = true;
+      this.radioButtonSearchType3.Location = new System.Drawing.Point(235, 31);
+      this.radioButtonSearchType3.Name = "radioButtonSearchType3";
+      this.radioButtonSearchType3.Size = new System.Drawing.Size(47, 17);
+      this.radioButtonSearchType3.TabIndex = 17;
+      this.radioButtonSearchType3.Text = "triple";
+      this.radioButtonSearchType3.UseVisualStyleBackColor = true;
+      this.radioButtonSearchType3.CheckedChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
+      // 
+      // label11
+      // 
+      this.label11.AutoSize = true;
+      this.label11.Location = new System.Drawing.Point(111, 15);
+      this.label11.Name = "label11";
+      this.label11.Size = new System.Drawing.Size(145, 13);
+      this.label11.TabIndex = 16;
+      this.label11.Text = "Search-Type (max. Resistors)";
+      // 
+      // radioButtonSearchType2
+      // 
+      this.radioButtonSearchType2.AutoSize = true;
+      this.radioButtonSearchType2.Checked = true;
+      this.radioButtonSearchType2.Location = new System.Drawing.Point(172, 31);
+      this.radioButtonSearchType2.Name = "radioButtonSearchType2";
+      this.radioButtonSearchType2.Size = new System.Drawing.Size(57, 17);
+      this.radioButtonSearchType2.TabIndex = 15;
+      this.radioButtonSearchType2.TabStop = true;
+      this.radioButtonSearchType2.Text = "double";
+      this.radioButtonSearchType2.UseVisualStyleBackColor = true;
+      this.radioButtonSearchType2.CheckedChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
+      // 
+      // radioButtonSearchType1
+      // 
+      this.radioButtonSearchType1.AutoSize = true;
+      this.radioButtonSearchType1.Location = new System.Drawing.Point(114, 31);
+      this.radioButtonSearchType1.Name = "radioButtonSearchType1";
+      this.radioButtonSearchType1.Size = new System.Drawing.Size(52, 17);
+      this.radioButtonSearchType1.TabIndex = 14;
+      this.radioButtonSearchType1.Text = "single";
+      this.radioButtonSearchType1.UseVisualStyleBackColor = true;
+      this.radioButtonSearchType1.CheckedChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
+      // 
       // listBoxSearchResults
       // 
       this.listBoxSearchResults.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.listBoxSearchResults.FormattingEnabled = true;
-      this.listBoxSearchResults.Location = new System.Drawing.Point(9, 57);
+      this.listBoxSearchResults.Location = new System.Drawing.Point(8, 57);
       this.listBoxSearchResults.Name = "listBoxSearchResults";
       this.listBoxSearchResults.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
       this.listBoxSearchResults.Size = new System.Drawing.Size(623, 446);
@@ -227,7 +333,7 @@
       // label10
       // 
       this.label10.AutoSize = true;
-      this.label10.Location = new System.Drawing.Point(6, 15);
+      this.label10.Location = new System.Drawing.Point(8, 15);
       this.label10.Name = "label10";
       this.label10.Size = new System.Drawing.Size(59, 13);
       this.label10.TabIndex = 12;
@@ -236,26 +342,11 @@
       // textBoxSearch
       // 
       this.textBoxSearch.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.textBoxSearch.Location = new System.Drawing.Point(6, 31);
+      this.textBoxSearch.Location = new System.Drawing.Point(8, 31);
       this.textBoxSearch.Name = "textBoxSearch";
       this.textBoxSearch.Size = new System.Drawing.Size(100, 20);
       this.textBoxSearch.TabIndex = 11;
       this.textBoxSearch.TextChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
-      // 
-      // contextMenuListBox
-      // 
-      this.contextMenuListBox.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.removeToolStripMenuItem});
-      this.contextMenuListBox.Name = "contextMenuListBox";
-      this.contextMenuListBox.Size = new System.Drawing.Size(146, 26);
-      // 
-      // removeToolStripMenuItem
-      // 
-      this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-      this.removeToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-      this.removeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-      this.removeToolStripMenuItem.Text = "&Remove";
-      this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
       // 
       // FormResistorHelper
       // 
@@ -266,12 +357,12 @@
       this.Controls.Add(this.listBoxResistors);
       this.Name = "FormResistorHelper";
       this.Text = "ResistorHelper 0.01";
+      this.contextMenuListBox.ResumeLayout(false);
       this.tabControl1.ResumeLayout(false);
       this.tabPageAdd.ResumeLayout(false);
       this.tabPageAdd.PerformLayout();
       this.tabPageSearch.ResumeLayout(false);
       this.tabPageSearch.PerformLayout();
-      this.contextMenuListBox.ResumeLayout(false);
       this.ResumeLayout(false);
 
     }
@@ -298,6 +389,13 @@
     private System.Windows.Forms.TextBox textBoxSearch;
     private System.Windows.Forms.ContextMenuStrip contextMenuListBox;
     private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
+    private System.Windows.Forms.RadioButton radioButtonSearchType2;
+    private System.Windows.Forms.RadioButton radioButtonSearchType1;
+    private System.Windows.Forms.RadioButton radioButtonSearchType4;
+    private System.Windows.Forms.RadioButton radioButtonSearchType3;
+    private System.Windows.Forms.Label label11;
+    private System.Windows.Forms.RadioButton radioButtonSearchType6;
+    private System.Windows.Forms.RadioButton radioButtonSearchType5;
   }
 }
 

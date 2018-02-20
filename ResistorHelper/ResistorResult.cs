@@ -1,4 +1,6 @@
 ﻿
+using System.Globalization;
+
 namespace ResistorHelper
 {
   /// <summary>
@@ -39,7 +41,9 @@ namespace ResistorHelper
     /// <returns>lesbare Zeichenfolge</returns>
     public override string ToString()
     {
-      return TxtValue(TackLifeOhm, resultMilliOhm).PadLeft(7) + "Ω (err: " + TxtValue(TackLifeOhm, errorMilliOhm).PadLeft(7) + "Ω) - " + resultResistor;
+      return TxtValue(TackLifeOhm, resultMilliOhm).PadLeft(7) + "Ω " +
+             "(err:" + (100.0 / resultMilliOhm * errorMilliOhm).ToString("0.000", CultureInfo.InvariantCulture).PadLeft(7) + " %)" +
+             " = " + resultResistor.ToStringSimple();
     }
   }
 }
