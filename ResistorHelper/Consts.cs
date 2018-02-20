@@ -39,7 +39,7 @@ namespace ResistorHelper
     /// <summary>
     /// Standard-Werte für Widerstände nach ISO-Norm
     /// </summary>
-    public static readonly KeyValuePair<string, short[]>[] EValues =
+    protected static readonly KeyValuePair<string, short[]>[] EValues =
     {
       new KeyValuePair<string, short[]>("E3 (obsolete)", GenExValues(3, 2)),
       new KeyValuePair<string, short[]>("E6 (20% tolerance)", GenExValues(6, 2)),
@@ -63,7 +63,7 @@ namespace ResistorHelper
     /// <summary>
     /// Tacklife Standard-Stufen
     /// </summary>
-    public static readonly MultimeterValue[] TackLifeOhm =
+    protected static readonly MultimeterValue[] TackLifeOhm =
     {
       new MultimeterValue(6, 600000, 3, 3, 1), // 600 Ohm
       new MultimeterValue(7, 6000000, 6, 1, 3), // 6 kOhm
@@ -81,7 +81,7 @@ namespace ResistorHelper
     /// <param name="skipZeros">optional: entfernt führende Nullen (default: true)</param>
     /// <param name="prefixFull">optional: gibt für die 1000er-Einheiten die vollständige Beschriftung zurück (z.B. "kilo", "mega")</param>
     /// <returns>fertig lesbare Zeichenfolge</returns>
-    public static string TxtValue(MultimeterValue[] multimeterValues, long value, bool skipZeros = true, bool prefixFull = false)
+    protected static string TxtValue(MultimeterValue[] multimeterValues, long value, bool skipZeros = true, bool prefixFull = false)
     {
       bool neg = value < 0;
       if (neg) value = -value;
@@ -101,12 +101,10 @@ namespace ResistorHelper
         value = (value + r) / d;
       }
 
-      string valStr = "";
-
       long divValue = 1;
       for (int i = 0; i < m.digitsLast; i++) divValue *= 10;
 
-      valStr = (value / divValue).ToString("D" + (skipZeros ? 1 : m.digitsFirst)) + (m.digitsLast > 0 ? "." + (value % divValue).ToString("D" + m.digitsLast) : "");
+      string valStr = (value / divValue).ToString("D" + (skipZeros ? 1 : m.digitsFirst)) + (m.digitsLast > 0 ? "." + (value % divValue).ToString("D" + m.digitsLast) : "");
 
       return (neg ? "-" : "") + valStr + " " + (prefixFull ? PrefixName[m.prefixIndex] + " " : PrefixSymbol[m.prefixIndex]);
     }

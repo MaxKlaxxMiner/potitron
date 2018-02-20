@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -90,14 +92,19 @@ namespace ResistorHelper
 
       const int TargetLimit = 1000;
 
+      var time = Stopwatch.StartNew();
+
       ResistorResult[] results = null;
-      foreach (double searchLevel in new[] { 1.000001, 1.00001, 1.0001, 1.0002, 1.0005, 1.001, 1.002, 1.005, 1.01, 1.02, 1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 9999999.9 })
+      foreach (double searchLevel in new[] { 1.0001, 1.0002, 1.0005, 1.001, 1.002, 1.005, 1.01, 1.02, 1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 9999999.9 })
       {
         results = Resistor.Search(listBoxResistors.Items.Cast<Resistor>().ToArray(), val, searchType, searchLevel).Take(TargetLimit).ToArray();
         if (results.Length >= TargetLimit / 2) break; // mindestens die Hälfte an Ergebnissen erreicht?
       }
 
       Array.Sort(results, (x, y) => x.errorMilliOhm.CompareTo(y.errorMilliOhm));
+
+      time.Stop();
+      Text = "Search-Time: " + time.ElapsedMilliseconds.ToString("N0", CultureInfo.InvariantCulture) + " ms";
 
       listBoxSearchResults.BeginUpdate();
       listBoxSearchResults.Items.Clear();

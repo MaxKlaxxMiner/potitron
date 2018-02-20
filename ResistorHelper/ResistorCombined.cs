@@ -1,4 +1,6 @@
 ﻿
+using System.Linq;
+
 namespace ResistorHelper
 {
   /// <summary>
@@ -7,13 +9,9 @@ namespace ResistorHelper
   public sealed class ResistorCombined : Resistor
   {
     /// <summary>
-    /// merkt sich den ersten Widerstand
+    /// merkt sich die kombinierten Widerständ
     /// </summary>
-    readonly Resistor resistor1;
-    /// <summary>
-    /// merkt sich den zweiten Widerstand
-    /// </summary>
-    readonly Resistor resistor2;
+    readonly Resistor[] resistors;
     /// <summary>
     /// merkt sich, ob die Widerstände seriell angeordnet wurden (false = parallel)
     /// </summary>
@@ -23,13 +21,11 @@ namespace ResistorHelper
     /// Konstruktor
     /// </summary>
     /// <param name="serial">gibt an, ob die Widerstände seriell angeordnet wurden (false = parallel)</param>
-    /// <param name="resistor1">erster Widerstand</param>
-    /// <param name="resistor2">zweiter Widerstand</param>
-    public ResistorCombined(bool serial, Resistor resistor1, Resistor resistor2)
-      : base(serial ? resistor1.valueMilliOhm + resistor2.valueMilliOhm : (long)(1.0 / (1.0 / resistor1.valueMilliOhm + 1.0 / resistor2.valueMilliOhm)))
+    /// <param name="resistors">Widerständ, welche kombiniert wurden</param>
+    public ResistorCombined(bool serial, params Resistor[] resistors)
+      : base(serial ? resistors.Sum(r => r.valueMilliOhm) : (long)(1.0 / (resistors.Sum(r => 1.0 / r.valueMilliOhm))))
     {
-      this.resistor1 = resistor1;
-      this.resistor2 = resistor2;
+      this.resistors = resistors;
       this.serial = serial;
     }
 
@@ -39,7 +35,7 @@ namespace ResistorHelper
     /// <returns>lesbare Zeichenkette</returns>
     public override string ToString()
     {
-      return "[" + (serial ? resistor1 + " + " + resistor2 : resistor1 + " || " + resistor2) + "]";
+      return "[" + (serial ? string.Join(" + ", resistors.Select(r => r.ToString())) : string.Join(" || ", resistors.Select(r => r.ToString()))) + "]";
     }
 
     /// <summary>
@@ -48,7 +44,7 @@ namespace ResistorHelper
     /// <returns>lesbare Zeichenfolge</returns>
     public override string ToStringSimple()
     {
-      return "[" + (serial ? resistor1.ToStringSimple() + " + " + resistor2.ToStringSimple() : resistor1.ToStringSimple() + " || " + resistor2.ToStringSimple()) + "]";
+      return "[" + (serial ? string.Join(" + ", resistors.Select(r => r.ToStringSimple())) : string.Join(" || ", resistors.Select(r => r.ToStringSimple()))) + "]";
     }
   }
 }

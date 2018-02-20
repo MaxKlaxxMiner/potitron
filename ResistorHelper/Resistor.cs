@@ -218,7 +218,21 @@ namespace ResistorHelper
             for (int x = y + 1; x < allResistors.Length; x++)
             {
               long err = Math.Abs(allResistors[x].valueMilliOhm + allResistors[y].valueMilliOhm + allResistors[z].valueMilliOhm - search);
-              if (err <= max) yield return new ResistorResult(new ResistorCombined(true, new ResistorCombined(true, allResistors[x], allResistors[y]), allResistors[z]), err);
+              if (err <= max) yield return new ResistorResult(new ResistorCombined(true, allResistors[x], allResistors[y], allResistors[z]), err);
+            }
+          }
+        }
+
+        // --- 3er Kombination - parallel ---
+        for (int z = 0; z < allResistors.Length - 2; z++)
+        {
+          for (int y = z + 1; y < allResistors.Length - 1; y++)
+          {
+            for (int x = y + 1; x < allResistors.Length; x++)
+            {
+              var c = new ResistorCombined(false, allResistors[x], allResistors[y], allResistors[z]);
+              long err = Math.Abs(c.valueMilliOhm - search);
+              if (err <= max) yield return new ResistorResult(c, err);
             }
           }
         }

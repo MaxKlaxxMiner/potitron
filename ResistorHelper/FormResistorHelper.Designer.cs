@@ -91,6 +91,9 @@
       // 
       // tabControl1
       // 
+      this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.tabControl1.Controls.Add(this.tabPageAdd);
       this.tabControl1.Controls.Add(this.tabPageSearch);
       this.tabControl1.Location = new System.Drawing.Point(222, 2);
@@ -246,6 +249,7 @@
       // radioButtonSearchType6
       // 
       this.radioButtonSearchType6.AutoSize = true;
+      this.radioButtonSearchType6.Enabled = false;
       this.radioButtonSearchType6.Location = new System.Drawing.Point(407, 31);
       this.radioButtonSearchType6.Name = "radioButtonSearchType6";
       this.radioButtonSearchType6.Size = new System.Drawing.Size(48, 17);
@@ -257,6 +261,7 @@
       // radioButtonSearchType5
       // 
       this.radioButtonSearchType5.AutoSize = true;
+      this.radioButtonSearchType5.Enabled = false;
       this.radioButtonSearchType5.Location = new System.Drawing.Point(349, 31);
       this.radioButtonSearchType5.Name = "radioButtonSearchType5";
       this.radioButtonSearchType5.Size = new System.Drawing.Size(52, 17);
@@ -268,6 +273,7 @@
       // radioButtonSearchType4
       // 
       this.radioButtonSearchType4.AutoSize = true;
+      this.radioButtonSearchType4.Enabled = false;
       this.radioButtonSearchType4.Location = new System.Drawing.Point(294, 31);
       this.radioButtonSearchType4.Name = "radioButtonSearchType4";
       this.radioButtonSearchType4.Size = new System.Drawing.Size(49, 17);
@@ -322,6 +328,9 @@
       // 
       // listBoxSearchResults
       // 
+      this.listBoxSearchResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.listBoxSearchResults.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.listBoxSearchResults.FormattingEnabled = true;
       this.listBoxSearchResults.Location = new System.Drawing.Point(8, 57);
