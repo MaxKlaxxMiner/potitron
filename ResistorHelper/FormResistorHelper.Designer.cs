@@ -101,7 +101,7 @@
       // label9
       // 
       this.label9.AutoSize = true;
-      this.label9.Location = new System.Drawing.Point(246, 15);
+      this.label9.Location = new System.Drawing.Point(6, 15);
       this.label9.Name = "label9";
       this.label9.Size = new System.Drawing.Size(31, 13);
       this.label9.TabIndex = 11;
@@ -110,7 +110,7 @@
       // label8
       // 
       this.label8.AutoSize = true;
-      this.label8.Location = new System.Drawing.Point(6, 15);
+      this.label8.Location = new System.Drawing.Point(174, 15);
       this.label8.Name = "label8";
       this.label8.Size = new System.Drawing.Size(59, 13);
       this.label8.TabIndex = 10;
@@ -119,7 +119,7 @@
       // textBoxIdent
       // 
       this.textBoxIdent.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.textBoxIdent.Location = new System.Drawing.Point(249, 31);
+      this.textBoxIdent.Location = new System.Drawing.Point(9, 31);
       this.textBoxIdent.Name = "textBoxIdent";
       this.textBoxIdent.Size = new System.Drawing.Size(157, 20);
       this.textBoxIdent.TabIndex = 8;
@@ -196,9 +196,9 @@
       // textBoxValue
       // 
       this.textBoxValue.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.textBoxValue.Location = new System.Drawing.Point(6, 31);
+      this.textBoxValue.Location = new System.Drawing.Point(174, 31);
       this.textBoxValue.Name = "textBoxValue";
-      this.textBoxValue.Size = new System.Drawing.Size(237, 20);
+      this.textBoxValue.Size = new System.Drawing.Size(100, 20);
       this.textBoxValue.TabIndex = 0;
       this.textBoxValue.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
       // 
@@ -238,7 +238,7 @@
       this.textBoxSearch.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.textBoxSearch.Location = new System.Drawing.Point(6, 31);
       this.textBoxSearch.Name = "textBoxSearch";
-      this.textBoxSearch.Size = new System.Drawing.Size(237, 20);
+      this.textBoxSearch.Size = new System.Drawing.Size(100, 20);
       this.textBoxSearch.TabIndex = 11;
       this.textBoxSearch.TextChanged += new System.EventHandler(this.textBoxSearch_TextChanged);
       // 
