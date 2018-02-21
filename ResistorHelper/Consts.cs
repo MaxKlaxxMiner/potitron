@@ -12,6 +12,11 @@ namespace ResistorHelper
   public class Consts
   {
     /// <summary>
+    /// merkt sich Divisor der Rev-Werte
+    /// </summary>
+    public const long RevValue = 1000000000000000000;
+
+    /// <summary>
     /// generiert eine Ex-Reihe der Widerstände
     /// </summary>
     /// <param name="count">Anzahl der zu generierenden Werte</param>

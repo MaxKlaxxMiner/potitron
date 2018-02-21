@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ResistorHelper
 {
@@ -11,7 +12,11 @@ namespace ResistorHelper
     /// <summary>
     /// merkt sich den Such-Cache
     /// </summary>
-    static KeyValuePair<long, Resistor>[] doubleCache = null;
+    static KeyValuePair<long, Resistor>[] doubleCache;
+    /// <summary>
+    /// merkt sich den Such-Cache mit Widerstandswerte 1/x
+    /// </summary>
+    static KeyValuePair<long, Resistor>[] doubleRevCache;
 
     /// <summary>
     /// leert den Such-Cache
@@ -19,12 +24,13 @@ namespace ResistorHelper
     public static void ResetSearchCache()
     {
       doubleCache = null;
+      doubleRevCache = null;
     }
 
     /// <summary>
-    /// ermittelt alle einzel und doppel Kombinationen aller Widerstände und gibt diese Sortiert zurück
+    /// ermittelt alle einzel und doppel Kombinationen aller Widerstände und gibt diese sortiert zurück
     /// </summary>
-    /// <param name="allResistors">Liste mit allen Widerständen</param>
+    /// <param name="allResistors">Liste mit allen Basis-Widerständen</param>
     /// <returns>fertig sortierte Liste mit entsprechenden Widerständen</returns>
     static KeyValuePair<long, Resistor>[] GetAllDoubles(Resistor[] allResistors)
     {
@@ -49,6 +55,20 @@ namespace ResistorHelper
       Array.Sort(result, (x, y) => x.Key.CompareTo(y.Key));
 
       return doubleCache = result;
+    }
+
+    /// <summary>
+    /// ermittelt alle einzel und doppel Kombinationen aller Widerstände und gibt diese nach 1/x sortiert zurück
+    /// </summary>
+    /// <param name="allResistors">Liste mit allen Basis-Widerständen</param>
+    /// <returns>fertig sortierte Liste mit entsprechenden Widerständen</returns>
+    static KeyValuePair<long, Resistor>[] GetAllRevDoubles(Resistor[] allResistors)
+    {
+      if (doubleRevCache != null) return doubleRevCache;
+      var doubles = GetAllDoubles(allResistors);
+      var result = doubles.Select(r => new KeyValuePair<long, Resistor>(RevValue / r.Key, r.Value)).ToArray();
+      Array.Sort(result, (x, y) => x.Key.CompareTo(y.Key));
+      return doubleRevCache = result;
     }
 
     /// <summary>
@@ -93,6 +113,7 @@ namespace ResistorHelper
       }
 
       var fullList = GetAllDoubles(allResistors);
+      var fullRevList = GetAllRevDoubles(allResistors);
 
       if (maxResistors >= 2) // 2-teilige Suche
       {
