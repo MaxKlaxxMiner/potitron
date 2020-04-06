@@ -113,18 +113,27 @@ namespace Network
             {
               var r = c as Resistor;
               if (r == null) continue;
-              matrixG[x, y] += 1 / r.ohm;
+              matrixG[y, x] += 1 / r.ohm;
             }
           }
           else // negative Summe der Leitwerte zwischen den benachbarten Knoten i und j (Koppelleitwerte). Besteht keine direkte Verbindung zwischen zwei Knoten, wird an dieser Stelle eine Null eingetragen.
           {
             var rs = nodes[x].components.Where(c => c is Resistor && nodes[y].components.Contains(c)).Cast<Resistor>().ToArray();
-            matrixG[x, y] = -rs.Sum(r => 1 / r.ohm);
+            matrixG[y, x] = -rs.Sum(r => 1 / r.ohm);
           }
         }
       }
 
-
+      // --- Matrix für die Spannungsquellen berechnen ---
+      var matrixB = new int[n, m]; // x/m = Spannungsquelle, y/n = Knoten
+      for (int y = 0; y < n; y++)
+      {
+        for (int x = 0; x < m; x++)
+        {
+          if (voltageSources[x].node1 == nodes[y]) matrixB[y, x] = 1;
+          if (voltageSources[x].node2 == nodes[y]) matrixB[y, x] = -1;
+        }
+      }
     }
 
     static void Main(string[] args)
