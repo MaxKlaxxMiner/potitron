@@ -124,8 +124,8 @@ namespace Network
         }
       }
 
-      // --- Matrix für die Spannungsquellen berechnen ---
-      var matrixB = new int[n, m]; // x/m = Spannungsquelle, y/n = Knoten
+      // --- Matrix B für die Spannungsquellen berechnen ---
+      var matrixB = new int[n, m]; // y/n = Knoten, x/m = Spannungsquelle
       for (int y = 0; y < n; y++)
       {
         for (int x = 0; x < m; x++)
@@ -134,6 +134,18 @@ namespace Network
           if (voltageSources[x].node2 == nodes[y]) matrixB[y, x] = -1;
         }
       }
+
+      // --- Matrix C für die Spannungsquellen berechnen ---
+      var matrixC = new int[m, n]; // y/m = Spannungsquelle, x/n = Knoten
+      for (int y = 0; y < m; y++)
+      {
+        for (int x = 0; x < n; x++)
+        {
+          if (voltageSources[y].node1 == nodes[x]) matrixC[y, x] = 1;
+          if (voltageSources[y].node2 == nodes[x]) matrixC[y, x] = -1;
+        }
+      }
+
     }
 
     static void Main(string[] args)
