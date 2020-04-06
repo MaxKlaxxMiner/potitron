@@ -90,10 +90,11 @@ namespace Network
       addNode(ground);
 
       var nodes = nodesHash.Where(x => x != ground).ToArray();
-      var voltageSources = componentsHash.Where(x => x is VoltageSource).ToArray();
+      var sources = componentsHash.Where(x => x is VoltageSource).Cast<VoltageSource>().ToArray();
+      var passives = componentsHash.Where(x => x is Resistor).Cast<Resistor>().ToArray();
 
       int n = nodes.Length;
-      int m = voltageSources.Length;
+      int m = sources.Length;
 
       //  matrixA: (m + n) * (m + n) - main matrix
       //    matrixG: n * n - interconnections between the passive circuit elements
@@ -130,8 +131,8 @@ namespace Network
       {
         for (int x = 0; x < m; x++)
         {
-          if (voltageSources[x].node1 == nodes[y]) matrixB[y, x] = 1;
-          if (voltageSources[x].node2 == nodes[y]) matrixB[y, x] = -1;
+          if (sources[x].node1 == nodes[y]) matrixB[y, x] = 1;
+          if (sources[x].node2 == nodes[y]) matrixB[y, x] = -1;
         }
       }
 
@@ -141,14 +142,63 @@ namespace Network
       {
         for (int x = 0; x < n; x++)
         {
-          if (voltageSources[y].node1 == nodes[x]) matrixC[y, x] = 1;
-          if (voltageSources[y].node2 == nodes[x]) matrixC[y, x] = -1;
+          if (sources[y].node1 == nodes[x]) matrixC[y, x] = 1;
+          if (sources[y].node2 == nodes[x]) matrixC[y, x] = -1;
         }
       }
 
       // --- Matrix D erstellen ---
       var matrixD = new int[m, m];
 
+      // --- x-Matrix vorbereiten ---
+      var vMatrixNodeVoltages = new double[n];   // Spannungen an den Knotenpunkten
+      var jMatrixSourceCurrents = new double[m]; // Ströme an den Spannungsquellen
+
+      // --- z-Matrix vorbereiten ---
+      var iMatrixNodeCurrents = new double[n];   // Summe der Ströme angeschlossener passiver Komponenten
+      var eMatrixSourceVoltages = new double[m]; // Spannungen der Spannungsquellen
+
+      for (int x = 0; x < n; x++)
+      {
+        iMatrixNodeCurrents[x] = 0;
+      }
+      for (int x = 0; x < m; x++)
+      {
+        eMatrixSourceVoltages[x] = sources[x].volt;
+      }
+
+      // --- Matrix A zusammenstellen ---
+      var matrixA = new double[n + m, n + m];
+      for (int y = 0; y < n; y++)
+      {
+        for (int x = 0; x < n; x++)
+        {
+          matrixA[y, x] = matrixG[y, x];
+        }
+      }
+      for (int y = 0; y < n; y++)
+      {
+        for (int x = 0; x < m; x++)
+        {
+          matrixA[y, x + n] = matrixB[y, x];
+        }
+      }
+      for (int y = 0; y < m; y++)
+      {
+        for (int x = 0; x < n; x++)
+        {
+          matrixA[y + n, x] = matrixC[y, x]; // matrixC kann durch matrixB (nur transponiert)
+        }
+      }
+      for (int y = 0; y < m; y++)
+      {
+        for (int x = 0; x < m; x++)
+        {
+          matrixA[y + n, x + n] = matrixD[y, x]; // theoretisch überflüssig (= 0)
+        }
+      }
+
+      // todo: https://lpsa.swarthmore.edu/Systems/Electrical/mna/MNA3.html#Putting_it_Together
     }
 
     static void Main(string[] args)
@@ -167,24 +217,24 @@ namespace Network
       //var r30 = new Resistor(30, wireMiddle, wire20V);
 
       // --- case 1 ---
-      //var ground = new Node();
-      //var node1 = new Node();
-      //var node2 = new Node();
-      //var node3 = new Node();
-      //var r1 = new Resistor(2, node1, ground);
-      //var r2 = new Resistor(4, node2, node3);
-      //var r3 = new Resistor(8, node2, ground);
-      //var source32V = new VoltageSource(32, node2, node1);
-      //var source20V = new VoltageSource(20, node3, ground);
-
-      // --- case 2 ---
       var ground = new Node();
       var node1 = new Node();
       var node2 = new Node();
+      var node3 = new Node();
       var r1 = new Resistor(2, node1, ground);
-      var r2 = new Resistor(4, node1, node2);
+      var r2 = new Resistor(4, node2, node3);
       var r3 = new Resistor(8, node2, ground);
-      var source32V = new VoltageSource(32, node1, node2);
+      var source32V = new VoltageSource(32, node2, node1);
+      var source20V = new VoltageSource(20, node3, ground);
+
+      // --- case 2 ---
+      //var ground = new Node();
+      //var node1 = new Node();
+      //var node2 = new Node();
+      //var r1 = new Resistor(2, node1, ground);
+      //var r2 = new Resistor(4, node1, node2);
+      //var r3 = new Resistor(8, node2, ground);
+      //var source32V = new VoltageSource(32, node1, node2);
 
       Calc(ground);
     }
