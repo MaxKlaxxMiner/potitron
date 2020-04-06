@@ -146,6 +146,9 @@ namespace Network
         }
       }
 
+      // --- Matrix D erstellen ---
+      var matrixD = new int[m, m];
+
     }
 
     static void Main(string[] args)
