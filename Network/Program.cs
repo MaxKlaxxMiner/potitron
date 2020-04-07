@@ -2,11 +2,16 @@
 // ReSharper disable RedundantUsingDirective
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.LinearAlgebra.Double.Solvers;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable PublicConstructorInAbstractClass
 // ReSharper disable ClassCanBeSealed.Local
@@ -67,7 +72,12 @@ namespace Network
 
     public class Node
     {
+      public double potential;
       public List<Component> components = new List<Component>();
+      public override string ToString()
+      {
+        return potential.ToString("N2") + " V";
+      }
     }
 
     public static void Calc(Node ground)
@@ -198,6 +208,12 @@ namespace Network
         }
       }
 
+      Matrix<double> matA = SparseMatrix.OfArray(matrixA);
+      Vector<double> vec = SparseVector.OfEnumerable(iMatrixNodeCurrents.Concat(eMatrixSourceVoltages));
+
+      var result = matA.Solve(vec);
+      for (int i = 0; i < nodes.Length; i++) nodes[i].potential = result[i];
+
       // todo: https://lpsa.swarthmore.edu/Systems/Electrical/mna/MNA3.html#Putting_it_Together
     }
 
@@ -217,15 +233,15 @@ namespace Network
       //var r30 = new Resistor(30, wireMiddle, wire20V);
 
       // --- case 1 ---
-      var ground = new Node();
-      var node1 = new Node();
-      var node2 = new Node();
-      var node3 = new Node();
-      var r1 = new Resistor(2, node1, ground);
-      var r2 = new Resistor(4, node2, node3);
-      var r3 = new Resistor(8, node2, ground);
-      var source32V = new VoltageSource(32, node2, node1);
-      var source20V = new VoltageSource(20, node3, ground);
+      //var ground = new Node();
+      //var node1 = new Node();
+      //var node2 = new Node();
+      //var node3 = new Node();
+      //var r1 = new Resistor(2, node1, ground);
+      //var r2 = new Resistor(4, node2, node3);
+      //var r3 = new Resistor(8, node2, ground);
+      //var source32V = new VoltageSource(32, node2, node1);
+      //var source20V = new VoltageSource(20, node3, ground);
 
       // --- case 2 ---
       //var ground = new Node();
@@ -235,6 +251,31 @@ namespace Network
       //var r2 = new Resistor(4, node1, node2);
       //var r3 = new Resistor(8, node2, ground);
       //var source32V = new VoltageSource(32, node1, node2);
+
+      // --- test ---
+      //var ground = new Node();
+      //var node1 = new Node();
+      //var node2 = new Node();
+      //var node3 = new Node();
+      //var r1 = new Resistor(1000, node1, node3);
+      //var r2 = new Resistor(100, node3, ground);
+      //var r3 = new Resistor(500, node1, node2);
+      //var r4 = new Resistor(1000, node2, node3);
+      //var source5V = new VoltageSource(5, node1, ground);
+
+      // --- test 2 ---
+      var ground = new Node();
+      var node1 = new Node();
+      var node2 = new Node();
+      var node3 = new Node();
+      var node4 = new Node();
+      var r1 = new Resistor(1500, node1, node2);
+      var r2 = new Resistor(470, node2, node3);
+      var r3 = new Resistor(1000, node3, node4);
+      var r4 = new Resistor(10000, node2, ground);
+      var r5 = new Resistor(2700, node3, ground);
+      var source9V = new VoltageSource(9, node1, ground);
+      var source3V = new VoltageSource(3, node4, ground);
 
       Calc(ground);
     }
