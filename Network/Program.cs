@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.LinearAlgebra.Double.Solvers;
+// ReSharper disable AccessToModifiedClosure
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable PublicConstructorInAbstractClass
@@ -217,67 +218,183 @@ namespace Network
       // todo: https://lpsa.swarthmore.edu/Systems/Electrical/mna/MNA3.html#Putting_it_Together
     }
 
+    #region # static readonly double[] Resistors =
+    static readonly double[] Resistors =
+    {
+      300,
+      330,
+      360,
+      390,
+      430,
+      470,
+      510,
+      560,
+      620,
+      680,
+      750,
+      820,
+      910,
+      1000,
+      1100,
+      1200,
+      1300,
+      1500,
+      1600,
+      1800,
+      2000,
+      2200,
+      2400,
+      2700,
+      3000,
+      3300,
+      3600,
+      3900,
+      4300,
+      4700,
+      5100,
+      5600,
+      6200,
+      6800,
+      7500,
+      8200,
+      9100,
+      10000,
+      10000,
+      11000,
+      12000,
+      13000,
+      15000,
+      16000,
+      18000,
+      20000,
+      22000,
+      24000,
+      27000,
+      30000,
+      33000,
+      36000,
+      39000,
+      43000,
+      47000,
+      51000,
+      56000,
+      62000,
+      68000,
+      75000,
+      82000,
+      91000,
+      100000
+    };
+    #endregion
+
     static void Main(string[] args)
     {
       Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-      //var ground = new Node();
-      //var wire10V = new Node();
-      //var wire20V = new Node();
-      //var wireMiddle = new Node();
+      var rnd = new Random();
 
-      //var source10V = new VoltageSource(10, ground, wire10V);
-      //var source20V = new VoltageSource(20, ground, wire20V);
-      //var r10 = new Resistor(10, wire10V, wireMiddle);
-      //var r20 = new Resistor(20, wireMiddle, ground);
-      //var r30 = new Resistor(30, wireMiddle, wire20V);
+      var rValues = new double[] { 1000, 1000, 1074, 1807 };
 
-      // --- case 1 ---
-      //var ground = new Node();
-      //var node1 = new Node();
-      //var node2 = new Node();
-      //var node3 = new Node();
-      //var r1 = new Resistor(2, node1, ground);
-      //var r2 = new Resistor(4, node2, node3);
-      //var r3 = new Resistor(8, node2, ground);
-      //var source32V = new VoltageSource(32, node2, node1);
-      //var source20V = new VoltageSource(20, node3, ground);
-
-      // --- case 2 ---
-      //var ground = new Node();
-      //var node1 = new Node();
-      //var node2 = new Node();
-      //var r1 = new Resistor(2, node1, ground);
-      //var r2 = new Resistor(4, node1, node2);
-      //var r3 = new Resistor(8, node2, ground);
-      //var source32V = new VoltageSource(32, node1, node2);
-
-      // --- test ---
-      //var ground = new Node();
-      //var node1 = new Node();
-      //var node2 = new Node();
-      //var node3 = new Node();
-      //var r1 = new Resistor(1000, node1, node3);
-      //var r2 = new Resistor(100, node3, ground);
-      //var r3 = new Resistor(500, node1, node2);
-      //var r4 = new Resistor(1000, node2, node3);
-      //var source5V = new VoltageSource(5, node1, ground);
-
-      // --- test 2 ---
       var ground = new Node();
-      var node1 = new Node();
-      var node2 = new Node();
-      var node3 = new Node();
-      var node4 = new Node();
-      var r1 = new Resistor(1500, node1, node2);
-      var r2 = new Resistor(470, node2, node3);
-      var r3 = new Resistor(1000, node3, node4);
-      var r4 = new Resistor(10000, node2, ground);
-      var r5 = new Resistor(2700, node3, ground);
-      var source9V = new VoltageSource(9, node1, ground);
-      var source3V = new VoltageSource(3, node4, ground);
+      var node5V = new Node();
+      var outputNode = new Node();
+      var source5V = new VoltageSource(5, node5V, ground);
 
-      Calc(ground);
+      var rPlus = new Resistor(rValues[0], node5V, outputNode);
+      var rMinus = new Resistor(rValues[1], ground, outputNode);
+
+      var pins = new KeyValuePair<VoltageSource, Resistor>[rValues.Length - 2];
+      for (int i = 0; i < pins.Length; i++)
+      {
+        var n = new Node();
+        var s = new VoltageSource(5, n, ground);
+        var r = new Resistor(rValues[i + 2], n, outputNode);
+        pins[i] = new KeyValuePair<VoltageSource, Resistor>(s, r);
+      }
+
+      int stateCount = 1;
+      for (int i = 0; i < pins.Length; i++) stateCount *= 3;
+
+      int selectValue = 0;
+      double bestPoints = -1;
+      string bestValues = "";
+      for (; ; )
+      {
+        var outputValues = new List<KeyValuePair<string, double>>();
+
+        for (int state = 0; state < stateCount; state++)
+        {
+          int stateValue = state;
+          string stateStr = "";
+          for (int pin = 0; pin < pins.Length; pin++)
+          {
+            int pinState = stateValue % 3;
+            stateValue /= 3;
+            stateStr += pinState;
+            switch (pinState)
+            {
+              case 0: pins[pin].Key.volt = 0; pins[pin].Value.ohm = rValues[pin + 2]; break; // LOW
+              case 1: pins[pin].Key.volt = 5; pins[pin].Value.ohm = 100000000; break;        // INPUT
+              case 2: pins[pin].Key.volt = 5; pins[pin].Value.ohm = rValues[pin + 2]; break; // HIGH
+              default: throw new Exception();
+            }
+          }
+
+          Calc(ground);
+          outputValues.Add(new KeyValuePair<string, double>(stateStr, outputNode.potential));
+        }
+
+        outputValues.Sort((x, y) => x.Value.CompareTo(y.Value));
+        double min = outputValues.Min(x => x.Value);
+        double max = outputValues.Max(x => x.Value);
+        double maxGap = 0;
+        for (int i = 1; i < outputValues.Count; i++)
+        {
+          double gap = outputValues[i].Value - outputValues[i - 1].Value;
+          if (gap > maxGap) maxGap = gap;
+        }
+
+        double points = 0;
+        double dynamic = max - min;
+        if (dynamic > 1.5)
+        {
+          points = dynamic / maxGap / (stateCount - 1);
+        }
+
+        Console.Clear();
+        Console.WriteLine();
+        Console.WriteLine("  Resistors: " + string.Join(" -", rValues.Skip(2).Select((x, i) => selectValue == i ? ">"+x.ToString("N0")  : " "+x.ToString("N0"))));
+        Console.WriteLine();
+        Console.WriteLine("  Precision: {0:N5} %", points);
+        Console.WriteLine();
+        foreach (var state in outputValues)
+        {
+          Console.WriteLine("{0}: {1:N5} V", string.Join(" ", state.Key).PadLeft(11), state.Value);
+        }
+        Console.WriteLine();
+
+        if (points > bestPoints)
+        {
+          bestPoints = points;
+          bestValues = string.Join(" - ", rValues.Skip(2).Select((x, i) => x.ToString("N0")));
+        }
+        Console.WriteLine();
+        Console.WriteLine("       Best: " + bestValues);
+        Console.WriteLine();
+        Console.WriteLine("             " + bestPoints.ToString("N5") + " %");
+
+        switch (Console.ReadKey().Key)
+        {
+          case ConsoleKey.Add:
+          case ConsoleKey.OemPlus: rValues[selectValue + 2]++; break;
+          case ConsoleKey.Subtract:
+          case ConsoleKey.OemMinus: rValues[selectValue + 2]--; break;
+          case ConsoleKey.Divide: selectValue--; if (selectValue < 0) selectValue = pins.Length - 1; break;
+          case ConsoleKey.Multiply:
+          case ConsoleKey.Spacebar: selectValue++; if (selectValue >= pins.Length) selectValue = 0; break;
+          case ConsoleKey.Escape: break;
+        }
+      }
     }
   }
 }
