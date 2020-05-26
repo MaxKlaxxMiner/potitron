@@ -16,12 +16,19 @@ namespace arduino_audio
   static unsafe class Program
   {
     const int Samples = 16;
-    const int SampleRate = 44100;
+    const int SampleRate = 48000;
 
     static Thread audioThread;
-    static readonly Random Rnd = new Random(12345);
 
-    static double sin;
+    static byte NextL()
+    {
+      return 128;
+    }
+
+    static byte NextR()
+    {
+      return 128;
+    }
 
     static void ReadWave(byte[] buffer)
     {
@@ -30,9 +37,14 @@ namespace arduino_audio
         var samples = (short*)bufferP;
         for (int i = 0; i < Samples * 2; i += 2)
         {
-          samples[i + 0] = (short)(Rnd.Next(-3000, 3000) * Math.Sin(sin));
-          samples[i + 1] = (short)Rnd.Next(-1500, 1500);
-          sin += Math.PI / SampleRate;
+          int l = (NextL() - 128) * 100;
+          int r = (NextR() - 128) * 100;
+
+          //todo: filter l
+          //todo: mix r und l
+
+          samples[i + 0] = (short)l;
+          samples[i + 1] = (short)r;
         }
       }
     }
@@ -71,8 +83,6 @@ namespace arduino_audio
           if (!mainThread.IsAlive) return;
           ReadWave(data);
           xaBuf.AudioData.Position = 0;
-          //xaBuf.AudioData.Write(data, 0, data.Length);
-          //xaBuf.AudioData.Position = 0;
           xaSv.SubmitSourceBuffer(xaBuf);
         };
 
@@ -85,7 +95,18 @@ namespace arduino_audio
       });
       audioThread.Start();
 
-      Console.ReadLine();
+      for (; ; )
+      {
+        if (Console.KeyAvailable)
+        {
+          Console.ReadKey(true).Key
+          switch (Console.ReadKey(true).Key)
+          {
+            case ConsoleKey.Escape: return;
+            case ConsoleKey.Q: 
+          }
+        }
+      }
     }
   }
 }
