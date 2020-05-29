@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -23,42 +24,55 @@ using XA = SlimDX.XAudio2;
 
 namespace arduino_audio
 {
-  public unsafe partial class Form1 : Form
+  public sealed unsafe partial class Form1 : Form
   {
     const int Samples = 16;
     const int SampleRate = 48000;
-    const double TestTon = 220.0;
+    double testTon = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
+    double tonOfsR = Math.Pow(2.0, 7.0 / 12);
+    //double tonOfsR = 1.0;
 
-    FilterTiefpass filterL;
-    FilterTiefpass filterR = new FilterTiefpass(10000.0 / SampleRate);
+    FilterTiefpassO3 filterL;
+    FilterTiefpass filterR;
 
     const int RollBufferSize = 65536;
     static short[] rollBufferL = new short[RollBufferSize];
     static short[] rollBufferR = new short[RollBufferSize];
     static int rollBufferPos;
 
-    static double testTonOfs;
+    double testTonOfsL;
+    double testTonOfsR;
 
     Random rnd = new Random();
 
-    int sig = 2;
+    int sig = 1;
 
     byte NextL()
     {
-      testTonOfs = (testTonOfs + TestTon / SampleRate) % 1;
+      testTonOfsL = (testTonOfsL + testTon / SampleRate) % 1;
 
       switch (sig)
       {
-        case 0: return (byte)((testTonOfs < 0.5 ? 20 : -20) + 128);
-        case 1: return (byte)((testTonOfs - 0.5) * 40 + 128);
-        case 2: return (byte)(Math.Sin(testTonOfs * Math.PI * 2) * 20 + 128);
+        case 1: return (byte)(Math.Sin(testTonOfsL * Math.PI * 2) * 20 + 128);
+        case 2: return (byte)((testTonOfsL < 0.5 ? testTonOfsL - 0.25 : 0.75 - testTonOfsL) * 80 + 128);
+        case 3: return (byte)((testTonOfsL - 0.5) * 40 + 128);
+        case 4: return (byte)((testTonOfsL < 0.5 ? 20 : -20) + 128);
+        default: return 128;
       }
-      return 128;
     }
 
     byte NextR()
     {
-      return (byte)rnd.Next(128 - 20, 128 + 20);
+      testTonOfsR = (testTonOfsR + testTon * tonOfsR / SampleRate) % 1;
+
+      switch (sig)
+      {
+        case 1: return (byte)(Math.Sin(testTonOfsR * Math.PI * 2) * 20 + rnd.Next(-3, 3) + 128);
+        case 2: return (byte)((testTonOfsR < 0.5 ? testTonOfsR - 0.25 : 0.75 - testTonOfsR) * 80 + rnd.Next(-3, 3) + 128);
+        case 3: return (byte)((testTonOfsR - 0.5) * 40 + rnd.Next(-3, 3) + 128);
+        case 4: return (byte)((testTonOfsR < 0.5 ? 20 : -20) + rnd.Next(-3, 3) + 128);
+        default: return (byte)(128 + rnd.Next(-3, 3));
+      }
     }
 
     void ReadWave(byte[] buffer)
@@ -73,9 +87,6 @@ namespace arduino_audio
 
           l = (short)filterL.Next(l);
           r = (short)filterR.Next(r);
-
-          //todo: filter l
-          //todo: mix r und l
 
           rollBufferL[rollBufferPos] = samples[i + 0] = (short)l;
           rollBufferR[rollBufferPos] = samples[i + 1] = (short)r;
@@ -129,6 +140,8 @@ namespace arduino_audio
           Thread.Sleep(1);
         }
         xaSv.Stop();
+        xaSv.Dispose();
+        xaDev.Dispose();
       });
       audioThread.Start();
     }
@@ -136,52 +149,19 @@ namespace arduino_audio
     void Form1_Load(object sender, EventArgs e)
     {
       filterL.faktor = vScrollBar1.Value / (double)SampleRate;
+      filterR.faktor = vScrollBar1.Value / (double)SampleRate;
     }
 
     Bitmap oszBitmap;
     bool draw;
-    int zoom = 4;
+    int zoom = 512;
 
-    void timer1_Tick(object sender, EventArgs e)
+    static void DrawBuffer(Graphics g, Color color, short[] buffer, int height, int zoom, int ofsY = 0)
     {
-      if (draw) return;
-      int width = pictureBox1.Width;
-      int height = pictureBox1.Height;
-      if (width < 32 || height < 32) return;
-      draw = true;
-
-      var readBuffer = rollBufferL;
-
-      var buffer = new short[width];
-      int pos = (rollBufferPos - buffer.Length + RollBufferSize) % RollBufferSize;
-      int trigger = pos;
-      for (int i = 0; i < RollBufferSize; i++)
-      {
-        int pre = (trigger - 1 + RollBufferSize) % RollBufferSize;
-        if (readBuffer[pre] >= 0) break;
-        trigger = pre;
-      }
-      for (int i = 0; i < RollBufferSize; i++)
-      {
-        int pre = (trigger - 1 + RollBufferSize) % RollBufferSize;
-        if (readBuffer[pre] < 0) break;
-        trigger = pre;
-      }
-      pos = trigger;
-      for (int i = 0; i < buffer.Length; i++) buffer[i] = readBuffer[(pos + i) % RollBufferSize];
-
-      if (oszBitmap == null || oszBitmap.Width != width || oszBitmap.Height != height)
-      {
-        oszBitmap = new Bitmap(width, height, PixelFormat.Format32bppRgb);
-        pictureBox1.Image = oszBitmap;
-      }
-
-      var g = Graphics.FromImage(oszBitmap);
-      g.Clear(Color.Black);
-      var pen = new Pen(Color.FromArgb(0x0080ff - 16777216));
-      int mul = height * zoom;
-      int ofs = (height * zoom - height) / 2;
-      for (int x = 1; x < width; x++)
+      var pen = new Pen(color);
+      int mul = height * zoom / 256;
+      int ofs = (height * zoom / 256 - height) / 2 + ofsY;
+      for (int x = 1; x < buffer.Length; x++)
       {
         int y1 = (32767 - buffer[x - 1]) * mul / 65536 - ofs;
         int y2 = (32767 - buffer[x]) * mul / 65536 - ofs;
@@ -191,27 +171,100 @@ namespace arduino_audio
         if (y2 >= height) y2 = height - 1;
         g.DrawLine(pen, x - 1, y1, x, y2);
       }
+    }
+
+    static int GetRollTrigger(short[] rollBuffer, int startPos)
+    {
+      int trigger = startPos % RollBufferSize;
+
+      for (int i = 0; i < RollBufferSize; i++)
+      {
+        int pre = (trigger - 1 + RollBufferSize) % RollBufferSize;
+        if (rollBuffer[pre] >= 0) break;
+        trigger = pre;
+      }
+      for (int i = 0; i < RollBufferSize; i++)
+      {
+        int pre = (trigger - 1 + RollBufferSize) % RollBufferSize;
+        if (rollBuffer[pre] < 0) break;
+        trigger = pre;
+      }
+
+      return trigger;
+    }
+
+    void timer1_Tick(object sender, EventArgs e)
+    {
+      if (draw) return;
+      int width = pictureBox1.Width;
+      int height = pictureBox1.Height;
+      if (width < 32 || height < 32) return;
+      draw = true;
+      if (oszBitmap == null || oszBitmap.Width != width || oszBitmap.Height != height)
+      {
+        oszBitmap = new Bitmap(width, height, PixelFormat.Format32bppRgb);
+        pictureBox1.Image = oszBitmap;
+      }
+
+      int triggerL = GetRollTrigger(rollBufferL, rollBufferPos - width + RollBufferSize);
+      int triggerR = GetRollTrigger(rollBufferR, rollBufferPos - width + RollBufferSize);
+
+      var buffer = new short[width];
+
+      var g = Graphics.FromImage(oszBitmap);
+      g.Clear(Color.Black);
+
+      for (int i = 0; i < buffer.Length; i++) buffer[i] = rollBufferR[(triggerR + i) % RollBufferSize];
+      DrawBuffer(g, Color.FromArgb(0xff8000 - 16777216), buffer, height, zoom, -height / 4);
+
+      for (int i = 0; i < buffer.Length; i++) buffer[i] = rollBufferL[(triggerL + i) % RollBufferSize];
+      DrawBuffer(g, Color.FromArgb(0x0080ff - 16777216), buffer, height, zoom, height / 4);
 
       pictureBox1.Refresh();
       draw = false;
     }
 
+    bool mouseR;
+
     void pictureBox1_MouseWheel(object sender, MouseEventArgs e)
     {
-      if (e.Delta < 0) zoom = Math.Max(1, zoom / 2);
-      if (e.Delta > 0) zoom = Math.Min(100, zoom * 2);
+      if (mouseR)
+      {
+        if (e.Delta < 0) zoom = Math.Max(1, zoom / 2);
+        if (e.Delta > 0) zoom = Math.Min(8192, zoom * 2);
+      }
+      else
+      {
+        if (e.Delta < 0) testTon /= Math.Pow(2.0, 1.0 / 12.0);
+        if (e.Delta > 0) testTon *= Math.Pow(2.0, 1.0 / 12.0);
+      }
     }
 
     void vScrollBar1_Scroll(object sender, ScrollEventArgs e)
     {
       filterL.faktor = e.NewValue / (double)SampleRate;
-      if (e.NewValue > 7000) filterL.faktor = 1;
+      filterR.faktor = e.NewValue / (double)SampleRate;
+      if (e.NewValue > 17000) filterL.faktor = filterR.faktor = 1;
     }
 
     void pictureBox1_MouseDown(object sender, MouseEventArgs e)
     {
-      sig++;
-      if (sig == 3) sig = 0;
+      if (e.Button.HasFlag(MouseButtons.Right)) mouseR = true;
+      if (e.Button.HasFlag(MouseButtons.Left))
+      {
+        sig++;
+        if (sig == 5) sig = 1;
+      }
+    }
+
+    void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+    {
+      if (e.Button.HasFlag(MouseButtons.Right)) mouseR = false;
+    }
+
+    private void Form1_Resize(object sender, EventArgs e)
+    {
+      timer1_Tick(null, null);
     }
   }
 }

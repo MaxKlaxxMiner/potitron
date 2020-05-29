@@ -1,6 +1,6 @@
 ﻿namespace arduino_audio
 {
-  partial class Form1
+  sealed partial class Form1
   {
     /// <summary>
     /// Erforderliche Designervariable.
@@ -52,6 +52,7 @@
       this.pictureBox1.TabIndex = 0;
       this.pictureBox1.TabStop = false;
       this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
+      this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
       this.pictureBox1.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseWheel);
       // 
       // vScrollBar1
@@ -60,7 +61,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.vScrollBar1.LargeChange = 1000;
       this.vScrollBar1.Location = new System.Drawing.Point(944, 12);
-      this.vScrollBar1.Maximum = 8000;
+      this.vScrollBar1.Maximum = 18000;
       this.vScrollBar1.Name = "vScrollBar1";
       this.vScrollBar1.Size = new System.Drawing.Size(47, 499);
       this.vScrollBar1.TabIndex = 1;
@@ -78,6 +79,7 @@
       this.Text = "Form1";
       this.Load += new System.EventHandler(this.Form1_Load);
       this.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseWheel);
+      this.Resize += new System.EventHandler(this.Form1_Resize);
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
       this.ResumeLayout(false);
 

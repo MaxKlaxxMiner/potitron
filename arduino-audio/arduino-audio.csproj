@@ -49,6 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FilterTiefpassO3.cs" />
+    <Compile Include="FilterTiefpassO2.cs" />
     <Compile Include="FilterTiefpass.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
