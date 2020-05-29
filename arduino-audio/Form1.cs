@@ -96,6 +96,7 @@ namespace arduino_audio
       }
     }
 
+    #region # --- form handling ---
     public Form1()
     {
       InitializeComponent();
@@ -262,9 +263,85 @@ namespace arduino_audio
       if (e.Button.HasFlag(MouseButtons.Right)) mouseR = false;
     }
 
-    private void Form1_Resize(object sender, EventArgs e)
+    void Form1_Resize(object sender, EventArgs e)
     {
       timer1_Tick(null, null);
     }
+
+    HashSet<Keys> keys = new HashSet<Keys>();
+
+    void Form1_KeyDown(object sender, KeyEventArgs e)
+    {
+      keys.Add(e.KeyCode);
+    }
+
+    void Form1_KeyUp(object sender, KeyEventArgs e)
+    {
+      keys.Remove(e.KeyCode);
+    }
+
+    static readonly Dictionary<Keys, int> KeyMapping = new Dictionary<Keys, int>
+    {
+      { (Keys)20, -14 + 12 }
+      //// --- unten ---
+
+      //new Tuple<int, int, char>(0, -14 + 12, '&'),
+      //new Tuple<int, int, char>(20, -14 + 12, 'A'),
+      //new Tuple<int, int, char>(226, -13 + 12, '<'),
+      //new Tuple<int, int, char>(89, -12 + 12, 'y'),
+      //new Tuple<int, int, char>(83, -11 + 12, 's'),
+      //new Tuple<int, int, char>(88, -10 + 12, 'x'),
+      //new Tuple<int, int, char>(68, -9 + 12, 'd'),
+      //new Tuple<int, int, char>(67, -8 + 12, 'c'),
+      //new Tuple<int, int, char>(86, -7 + 12, 'v'),
+      //new Tuple<int, int, char>(71, -6 + 12, 'g'),
+      //new Tuple<int, int, char>(66, -5 + 12, 'b'),
+      //new Tuple<int, int, char>(72, -4 + 12, 'h'),
+      //new Tuple<int, int, char>(78, -3 + 12, 'n'),
+      //new Tuple<int, int, char>(74, -2 + 12, 'j'),
+      //new Tuple<int, int, char>(77, -1 + 12, 'm'),
+
+      //new Tuple<int, int, char>(188, 0 + 12, ','),
+      //new Tuple<int, int, char>(76, 1 + 12, 'l'),
+      //new Tuple<int, int, char>(190, 2 + 12, '.'),
+      //new Tuple<int, int, char>(192, 3 + 12, 'ö'),
+      //new Tuple<int, int, char>(189, 4 + 12, '-'),
+      //new Tuple<int, int, char>(16, 5 + 12, 'S'),
+      //new Tuple<int, int, char>(191, 6 + 12, '#'),
+
+      //// --- oben ---
+
+      //new Tuple<int, int, char>(220, -2 + 12, '^'),
+      //new Tuple<int, int, char>(9, -1 + 12, 'T'),
+
+      //new Tuple<int, int, char>(81, 0 + 12, 'q'),
+      //new Tuple<int, int, char>(50, 1 + 12, '2'),
+      //new Tuple<int, int, char>(87, 2 + 12, 'w'),
+      //new Tuple<int, int, char>(51, 3 + 12, '3'),
+      //new Tuple<int, int, char>(69, 4 + 12, 'e'),
+      //new Tuple<int, int, char>(82, 5 + 12, 'r'),
+      //new Tuple<int, int, char>(53, 6 + 12, '5'),
+      //new Tuple<int, int, char>(84, 7 + 12, 't'),
+      //new Tuple<int, int, char>(54, 8 + 12, '6'),
+      //new Tuple<int, int, char>(90, 9 + 12, 'z'),
+      //new Tuple<int, int, char>(55, 10 + 12, '7'),
+      //new Tuple<int, int, char>(85, 11 + 12, 'u'),
+      //new Tuple<int, int, char>(73, 12 + 12, 'i'),
+      //new Tuple<int, int, char>(57, 13 + 12, '9'),
+      //new Tuple<int, int, char>(79, 14 + 12, 'o'),
+      //new Tuple<int, int, char>(48, 15 + 12, '0'),
+      //new Tuple<int, int, char>(80, 16 + 12, 'p'),
+      //new Tuple<int, int, char>(186, 17 + 12, 'ü'),
+      //new Tuple<int, int, char>(221, 18 + 12, '´'),
+      //new Tuple<int, int, char>(187, 19 + 12, '+'),
+      //new Tuple<int, int, char>(8, 20 + 12, 'B'),
+      //new Tuple<int, int, char>(13, 21 + 12, 'E'),
+      //new Tuple<int, int, char>(45, 22 + 12, 'I'),
+      //new Tuple<int, int, char>(46, 23 + 12, 'N'),
+      //new Tuple<int, int, char>(35, 24 + 12, 'D')
+    };
+
+    #endregion
+
   }
 }
