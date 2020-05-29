@@ -1,5 +1,8 @@
 ﻿// ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable FieldCanBeMadeReadOnly.Global
+
+using System;
+
 namespace arduino_audio
 {
   /// <summary>
@@ -23,7 +26,7 @@ namespace arduino_audio
     /// <param name="wert">optionaler Startwert</param>
     public FilterTiefpass(double faktor, double wert = 0.0)
     {
-      this.faktor = faktor;
+      this.faktor = Math.Min(1.0, Math.Max(0.00001, faktor));
       this.wert = wert;
     }
 
