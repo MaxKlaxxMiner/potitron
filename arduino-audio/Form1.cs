@@ -40,41 +40,6 @@ namespace arduino_audio
       return (byte)rnd.Next(128 - 20, 128 + 20);
     }
 
-    public struct FilterTiefpass
-    {
-      /// <summary>
-      /// merkt sich den zu benutzenden Faktor zwischen 0 und 1 (niedriger = stärkerer Filter)
-      /// </summary>
-      public double faktor;
-      /// <summary>
-      /// letzter berechneter Wert
-      /// </summary>
-      public double wert;
-
-      /// <summary>
-      /// Konstruktor
-      /// </summary>
-      /// <param name="faktor">pro Sample zwischen 0 und 1 (niedriger = stärkerer Filter)</param>
-      /// <param name="wert">optionaler Startwert</param>
-      public FilterTiefpass(double faktor, double wert = 0.0)
-      {
-        this.faktor = faktor;
-        this.wert = wert;
-      }
-
-      /// <summary>
-      /// berechnet einen neuen Wert durch den Filter und gibt den neuen Wert zurück
-      /// </summary>
-      /// <param name="wert">eingehender Wert</param>
-      /// <returns>ausgehender Wert</returns>
-      public double Next(double wert)
-      {
-        double dif = wert - this.wert;
-        this.wert += dif * faktor;
-        return this.wert;
-      }
-    }
-
     FilterTiefpass filterL = new FilterTiefpass(20000.0 / SampleRate);
     FilterTiefpass filterR = new FilterTiefpass(20000.0 / SampleRate);
 
@@ -160,8 +125,8 @@ namespace arduino_audio
 
     }
 
-    Bitmap oszBitmap = null;
-    bool draw = false;
+    Bitmap oszBitmap;
+    bool draw;
 
     void timer1_Tick(object sender, EventArgs e)
     {
@@ -187,7 +152,7 @@ namespace arduino_audio
       var pen = new Pen(Color.FromArgb(0x0080ff - 16777216));
       for (int x = 1; x < width; x++)
       {
-        g.DrawLine(pen, x - 1, (buffer[x - 1] + 32768) * height / 65536, x, (buffer[x] + 32768) * height / 65536);
+        g.DrawLine(pen, x - 1, (32767 - buffer[x - 1]) * height / 65536, x, (32767 - buffer[x]) * height / 65536);
       }
 
       pictureBox1.Refresh();
