@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MidiInput.cs" />
     <Compile Include="FilterTiefpassO3.cs" />
     <Compile Include="FilterTiefpassO2.cs" />
     <Compile Include="FilterTiefpass.cs" />
