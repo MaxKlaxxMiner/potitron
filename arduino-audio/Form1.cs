@@ -29,8 +29,10 @@ namespace arduino_audio
     const int Samples = 16;
     const int SampleRate = 48000;
     double testTon = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
-    double tonOfsR = Math.Pow(2.0, 7.0 / 12);
-    //double tonOfsR = 1.0;
+    //double tonOfsR = Math.Pow(2.0, 7.0 / 12);
+    double tonOfsR = 2.0;
+
+    MidiInput midi;
 
     FilterTiefpassO3 filterL;
     FilterTiefpass filterR;
@@ -45,7 +47,7 @@ namespace arduino_audio
 
     Random rnd = new Random();
 
-    int sig = 1;
+    int sig = 4;
 
     byte NextL()
     {
@@ -77,6 +79,24 @@ namespace arduino_audio
 
     void ReadWave(byte[] buffer)
     {
+      if (midi != null)
+      {
+        var midiValue = midi.ReadValue();
+        if (midiValue.Valid)
+        {
+          //Text = midiValue.ToString();
+          if (midiValue.control == 144)
+          {
+            testTon = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 9)) * 13.75;
+          }
+          if (midiValue.control == 128)
+          {
+            var t = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 9)) * 13.75;
+            if (testTon == t) testTon = 0;
+          }
+        }
+      }
+
       fixed (byte* bufferP = buffer)
       {
         var samples = (short*)bufferP;
@@ -117,7 +137,7 @@ namespace arduino_audio
         };
 
         // ReSharper disable once ObjectCreationAsStatement
-        new XA.MasteringVoice(xaDev, 2, 44100, 0);
+        new XA.MasteringVoice(xaDev, 2, SampleRate, 0);
         var xaSv = new XA.SourceVoice(xaDev, wf, XA.VoiceFlags.None);
         var xaBuf = new XA.AudioBuffer();
 
@@ -135,6 +155,7 @@ namespace arduino_audio
           xaSv.SubmitSourceBuffer(xaBuf);
         };
 
+        if (MidiInput.InputCount > 0) midi = new MidiInput(0);
         xaSv.Start();
         while (mainThread.IsAlive)
         {
@@ -143,6 +164,7 @@ namespace arduino_audio
         xaSv.Stop();
         xaSv.Dispose();
         xaDev.Dispose();
+        if (midi != null) midi.Dispose();
       });
       audioThread.Start();
     }
