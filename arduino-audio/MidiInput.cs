@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace arduino_audio
 {
-  public class MidiInput : IDisposable
+  public sealed class MidiInput : IDisposable
   {
     public delegate void MidiInProc(IntPtr hMidiIn, int wMsg, IntPtr dwInstance, uint dwParam1, uint dwParam2);
 
@@ -25,37 +25,27 @@ namespace arduino_audio
     [DllImport("winmm.dll")]
     static extern int midiInStop(IntPtr hMidiIn);
 
-    IntPtr handle;
+    readonly List<IntPtr> handles = new List<IntPtr>();
+
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     readonly MidiInProc callBackFunc;
-    public MidiInput(int id)
+    public MidiInput(int id = -1)
     {
       callBackFunc = MidiCallBack;
-      if (midiInOpen(out handle, id, callBackFunc, IntPtr.Zero, 0x30000) != 0) throw new Exception("MIDI-Init Error");
-      if (midiInStart(handle) != 0) throw new Exception("MIDI-Start Error");
-    }
+      IntPtr handle;
 
-    [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    public struct MidiValue
-    {
-      public readonly byte undefined;
-      public readonly byte velocity;
-      public readonly byte note;
-      public readonly byte control;
-      public readonly uint timeStamp;
-      public MidiValue(uint param1, uint param2)
+      if (id >= 0)
       {
-        undefined = (byte)(param1 >> 24);
-        velocity = (byte)(param1 >> 16);
-        note = (byte)(param1 >> 8);
-        control = (byte)param1;
-        timeStamp = param2;
+        if (midiInOpen(out handle, id, callBackFunc, IntPtr.Zero, 0x30000) == 0 && midiInStart(handle) == 0) handles.Add(handle);
       }
-      public override string ToString()
+      else
       {
-        return (new { control, note, velocity, timeStamp }).ToString();
+        int count = DeviceInputCount;
+        for (int i = 0; i < count; i++)
+        {
+          if (midiInOpen(out handle, i, callBackFunc, IntPtr.Zero, 0x30000) == 0 && midiInStart(handle) == 0) handles.Add(handle);
+        }
       }
-      public bool Valid { get { return control != 0; } }
     }
 
     readonly Queue<MidiValue> midiBuffer = new Queue<MidiValue>();
@@ -76,19 +66,34 @@ namespace arduino_audio
       }
     }
 
-    public static int InputCount
+    public void SimulateValue(MidiValue value)
+    {
+      lock (midiBuffer)
+      {
+        midiBuffer.Enqueue(value);
+      }
+    }
+
+    public static int DeviceInputCount
     {
       get { return midiInGetNumDevs(); }
     }
 
     public void Dispose()
     {
-      if (handle != IntPtr.Zero)
+      foreach (var handle in handles)
       {
-        midiInStop(handle);
-        midiInClose(handle);
-        handle = IntPtr.Zero;
+        try
+        {
+          midiInStop(handle);
+          midiInClose(handle);
+        }
+        catch
+        {
+          // ignored
+        }
       }
+      handles.Clear();
     }
   }
 }

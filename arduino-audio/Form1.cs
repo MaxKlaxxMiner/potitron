@@ -30,7 +30,7 @@ namespace arduino_audio
     const int SampleRate = 48000;
     double testTon = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
     //double tonOfsR = Math.Pow(2.0, 7.0 / 12);
-    double tonOfsR = 2.0;
+    double tonOfsR = 1.0;
 
     MidiInput midi;
 
@@ -85,13 +85,13 @@ namespace arduino_audio
         if (midiValue.Valid)
         {
           //Text = midiValue.ToString();
-          if (midiValue.control == 144)
+          if ((midiValue.control & 0xf0) == 0x90)
           {
-            testTon = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 9)) * 13.75;
+            testTon = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 21)) * 13.75;
           }
-          if (midiValue.control == 128)
+          if ((midiValue.control & 0xf0) == 0x80)
           {
-            var t = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 9)) * 13.75;
+            var t = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 21)) * 13.75;
             if (testTon == t) testTon = 0;
           }
         }
@@ -155,7 +155,7 @@ namespace arduino_audio
           xaSv.SubmitSourceBuffer(xaBuf);
         };
 
-        if (MidiInput.InputCount > 0) midi = new MidiInput(0);
+        midi = new MidiInput();
         xaSv.Start();
         while (mainThread.IsAlive)
         {
@@ -164,7 +164,7 @@ namespace arduino_audio
         xaSv.Stop();
         xaSv.Dispose();
         xaDev.Dispose();
-        if (midi != null) midi.Dispose();
+        midi.Dispose();
       });
       audioThread.Start();
     }
@@ -290,80 +290,86 @@ namespace arduino_audio
       timer1_Tick(null, null);
     }
 
-    HashSet<Keys> keys = new HashSet<Keys>();
-
     void Form1_KeyDown(object sender, KeyEventArgs e)
     {
-      keys.Add(e.KeyCode);
+      byte note;
+      if (KeyMapping.TryGetValue(e.KeyCode, out note))
+      {
+        midi.SimulateValue(new MidiValue(true, note));
+      }
+      if (e.KeyCode == Keys.Escape) Close();
     }
 
     void Form1_KeyUp(object sender, KeyEventArgs e)
     {
-      keys.Remove(e.KeyCode);
+      byte note;
+      if (KeyMapping.TryGetValue(e.KeyCode, out note))
+      {
+        midi.SimulateValue(new MidiValue(false, note));
+      }
     }
 
-    static readonly Dictionary<Keys, int> KeyMapping = new Dictionary<Keys, int>
+    static readonly Dictionary<Keys, byte> KeyMapping = new Dictionary<Keys, byte>
     {
-      { (Keys)20, -14 + 12 }
-      //// --- unten ---
+      // --- unten ---
 
-      //new Tuple<int, int, char>(0, -14 + 12, '&'),
-      //new Tuple<int, int, char>(20, -14 + 12, 'A'),
-      //new Tuple<int, int, char>(226, -13 + 12, '<'),
-      //new Tuple<int, int, char>(89, -12 + 12, 'y'),
-      //new Tuple<int, int, char>(83, -11 + 12, 's'),
-      //new Tuple<int, int, char>(88, -10 + 12, 'x'),
-      //new Tuple<int, int, char>(68, -9 + 12, 'd'),
-      //new Tuple<int, int, char>(67, -8 + 12, 'c'),
-      //new Tuple<int, int, char>(86, -7 + 12, 'v'),
-      //new Tuple<int, int, char>(71, -6 + 12, 'g'),
-      //new Tuple<int, int, char>(66, -5 + 12, 'b'),
-      //new Tuple<int, int, char>(72, -4 + 12, 'h'),
-      //new Tuple<int, int, char>(78, -3 + 12, 'n'),
-      //new Tuple<int, int, char>(74, -2 + 12, 'j'),
-      //new Tuple<int, int, char>(77, -1 + 12, 'm'),
+      { 0, 57 },         // A3 (capslock - german)
+      { Keys.A, 58 },    // A#3
+      { (Keys)226, 59 }, // B3 (less than - german)
+      { Keys.Y, 60 },    // C4
+      { Keys.S, 61 },    // C#4
+      { Keys.X, 62 },    // D4
+      { Keys.D, 63 },    // D#4
+      { Keys.C, 64 },    // E4
+      { Keys.V, 65 },    // F4
+      { Keys.G, 66 },    // F#4
+      { Keys.B, 67 },    // G4
+      { Keys.H, 68 },    // G#4
+      { Keys.N, 69 },    // A4
+      { Keys.J, 70 },    // A#4
+      { Keys.M, 71 },    // B4
 
-      //new Tuple<int, int, char>(188, 0 + 12, ','),
-      //new Tuple<int, int, char>(76, 1 + 12, 'l'),
-      //new Tuple<int, int, char>(190, 2 + 12, '.'),
-      //new Tuple<int, int, char>(192, 3 + 12, 'ö'),
-      //new Tuple<int, int, char>(189, 4 + 12, '-'),
-      //new Tuple<int, int, char>(16, 5 + 12, 'S'),
-      //new Tuple<int, int, char>(191, 6 + 12, '#'),
+      { (Keys)188, 72 }, // C5 (comma - german)
+      { Keys.L, 73 },    // C#5
+      { (Keys)190, 74 }, // D5 (period - german)
+      { (Keys)192, 75 }, // D#5 (ö - german)
+      { (Keys)189, 76 }, // E5 (hyphen - german)
+      { (Keys)16, 77 },  // F5 (shift)
+      { (Keys)191, 78 }, // F#5 (# - german)
 
-      //// --- oben ---
+      // --- oben ---
 
-      //new Tuple<int, int, char>(220, -2 + 12, '^'),
-      //new Tuple<int, int, char>(9, -1 + 12, 'T'),
-
-      //new Tuple<int, int, char>(81, 0 + 12, 'q'),
-      //new Tuple<int, int, char>(50, 1 + 12, '2'),
-      //new Tuple<int, int, char>(87, 2 + 12, 'w'),
-      //new Tuple<int, int, char>(51, 3 + 12, '3'),
-      //new Tuple<int, int, char>(69, 4 + 12, 'e'),
-      //new Tuple<int, int, char>(82, 5 + 12, 'r'),
-      //new Tuple<int, int, char>(53, 6 + 12, '5'),
-      //new Tuple<int, int, char>(84, 7 + 12, 't'),
-      //new Tuple<int, int, char>(54, 8 + 12, '6'),
-      //new Tuple<int, int, char>(90, 9 + 12, 'z'),
-      //new Tuple<int, int, char>(55, 10 + 12, '7'),
-      //new Tuple<int, int, char>(85, 11 + 12, 'u'),
-      //new Tuple<int, int, char>(73, 12 + 12, 'i'),
-      //new Tuple<int, int, char>(57, 13 + 12, '9'),
-      //new Tuple<int, int, char>(79, 14 + 12, 'o'),
-      //new Tuple<int, int, char>(48, 15 + 12, '0'),
-      //new Tuple<int, int, char>(80, 16 + 12, 'p'),
-      //new Tuple<int, int, char>(186, 17 + 12, 'ü'),
-      //new Tuple<int, int, char>(221, 18 + 12, '´'),
-      //new Tuple<int, int, char>(187, 19 + 12, '+'),
-      //new Tuple<int, int, char>(8, 20 + 12, 'B'),
-      //new Tuple<int, int, char>(13, 21 + 12, 'E'),
-      //new Tuple<int, int, char>(45, 22 + 12, 'I'),
-      //new Tuple<int, int, char>(46, 23 + 12, 'N'),
-      //new Tuple<int, int, char>(35, 24 + 12, 'D')
+      { (Keys)220, 70 }, // A#4  (tilde - german)
+      { Keys.Tab, 71 },  // B4
+      { Keys.Q, 72 },    // C5
+      { Keys.D2, 73 },   // C#5
+      { Keys.W, 74 },    // D5
+      { Keys.D3, 75 },   // D#5
+      { Keys.E, 76 },    // E5
+      { Keys.R, 77 },    // F5
+      { Keys.D5, 78 },   // F#5
+      { Keys.T, 79 },    // G5
+      { Keys.D6, 80 },   // G#5
+      { Keys.Z, 81 },    // A5
+      { Keys.D7, 82 },   // A#5
+      { Keys.U, 83 },    // B5
+      { Keys.I, 84 },    // C6
+      { Keys.D9, 85 },   // C#6
+      { Keys.O, 86 },    // D6
+      { Keys.D0, 87 },   // D#6
+      { Keys.P, 88 },    // E6
+      { (Keys)186, 89 }, // F6  (Ü - german)
+      { (Keys)221, 90 }, // F#6 (` - german)
+      { (Keys)187, 91 }, // G6  (+ - german)
+      { (Keys)8, 92 },   // G#6 (backspace)
+      { (Keys)13, 93 },  // A6  (return)
+      { (Keys)45, 94 },  // A#6 (insert)
+      { (Keys)46, 95 },  // B6  (del)
+      { (Keys)35, 96 },  // C7  (end)
+      { (Keys)33, 97 },  // C#7 (pageUp)
+      { (Keys)34, 98 },  // D7  (pageDown)
     };
 
     #endregion
-
   }
 }
