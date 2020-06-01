@@ -28,9 +28,8 @@ namespace arduino_audio
   {
     const int Samples = 16;
     const int SampleRate = 48000;
-    double testTon = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
-    //double tonOfsR = Math.Pow(2.0, 7.0 / 12);
-    double tonOfsR = 1.0;
+    double testWaveStep = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
+    double testWave;
 
     MidiInput midi;
 
@@ -42,37 +41,35 @@ namespace arduino_audio
     static short[] rollBufferR = new short[RollBufferSize];
     static int rollBufferPos;
 
-    double testTonOfsL;
-    double testTonOfsR;
-
     Random rnd = new Random();
 
     int sig = 4;
 
     byte NextL()
     {
-      testTonOfsL = (testTonOfsL + testTon / SampleRate) % 1;
+      testWave = (testWave + testWaveStep / SampleRate) % 1;
+      if (testWaveStep == 0) return 128;
 
       switch (sig)
       {
-        case 1: return (byte)(Math.Sin(testTonOfsL * Math.PI * 2) * 20 + 128);
-        case 2: return (byte)((testTonOfsL < 0.5 ? testTonOfsL - 0.25 : 0.75 - testTonOfsL) * 80 + 128);
-        case 3: return (byte)((testTonOfsL - 0.5) * 40 + 128);
-        case 4: return (byte)((testTonOfsL < 0.5 ? 20 : -20) + 128);
+        case 1: return (byte)(Math.Sin(testWave * Math.PI * 2) * 20 + 128);
+        case 2: return (byte)((testWave < 0.5 ? testWave - 0.25 : 0.75 - testWave) * 80 + 128);
+        case 3: return (byte)((testWave - 0.5) * 40 + 128);
+        case 4: return (byte)((testWave < 0.5 ? 20 : -20) + 128);
         default: return 128;
       }
     }
 
     byte NextR()
     {
-      testTonOfsR = (testTonOfsR + testTon * tonOfsR / SampleRate) % 1;
+      if (testWaveStep == 0) return (byte)(128 + rnd.Next(-3, 3));
 
       switch (sig)
       {
-        case 1: return (byte)(Math.Sin(testTonOfsR * Math.PI * 2) * 20 + rnd.Next(-3, 3) + 128);
-        case 2: return (byte)((testTonOfsR < 0.5 ? testTonOfsR - 0.25 : 0.75 - testTonOfsR) * 80 + rnd.Next(-3, 3) + 128);
-        case 3: return (byte)((testTonOfsR - 0.5) * 40 + rnd.Next(-3, 3) + 128);
-        case 4: return (byte)((testTonOfsR < 0.5 ? 20 : -20) + rnd.Next(-3, 3) + 128);
+        case 1: return (byte)(Math.Sin(testWave * Math.PI * 2) * 20 + rnd.Next(-3, 3) + 128);
+        case 2: return (byte)((testWave < 0.5 ? testWave - 0.25 : 0.75 - testWave) * 80 + rnd.Next(-3, 3) + 128);
+        case 3: return (byte)((testWave - 0.5) * 40 + rnd.Next(-3, 3) + 128);
+        case 4: return (byte)((testWave < 0.5 ? 20 : -20) + rnd.Next(-3, 3) + 128);
         default: return (byte)(128 + rnd.Next(-3, 3));
       }
     }
@@ -87,12 +84,12 @@ namespace arduino_audio
           //Text = midiValue.ToString();
           if ((midiValue.control & 0xf0) == 0x90)
           {
-            testTon = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 21)) * 13.75;
+            testWaveStep = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 21)) * 13.75;
           }
           if ((midiValue.control & 0xf0) == 0x80)
           {
             var t = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 21)) * 13.75;
-            if (testTon == t) testTon = 0;
+            if (testWaveStep == t) testWaveStep = 0;
           }
         }
       }
@@ -258,8 +255,9 @@ namespace arduino_audio
       }
       else
       {
-        if (e.Delta < 0) testTon /= Math.Pow(2.0, 1.0 / 12.0);
-        if (e.Delta > 0) testTon *= Math.Pow(2.0, 1.0 / 12.0);
+        if (testWaveStep == 0) testWaveStep = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
+        if (e.Delta < 0) testWaveStep /= Math.Pow(2.0, 1.0 / 12.0);
+        if (e.Delta > 0) testWaveStep *= Math.Pow(2.0, 1.0 / 12.0);
       }
     }
 
