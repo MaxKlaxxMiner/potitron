@@ -28,10 +28,8 @@ namespace arduino_audio
   {
     const int Samples = 16;
     const int SampleRate = 48000;
-    double testWaveStep = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
-    double testWave;
 
-    MidiInput midi;
+    MidiInput midi = new MidiInput();
 
     FilterTiefpassO3 filterL;
     FilterTiefpass filterR;
@@ -43,54 +41,58 @@ namespace arduino_audio
 
     Random rnd = new Random();
 
-    int sig = 4;
+    double micros;
+    Dictionary<byte, Tone> tones = new Dictionary<byte, Tone>();
+
+    int sig = 7;
 
     byte NextL()
     {
-      testWave = (testWave + testWaveStep / SampleRate) % 1;
-      if (testWaveStep == 0) return 128;
+      micros += 1000000.0 / SampleRate;
+      uint mc = ((uint)micros) & 0xfffffffc;
 
-      switch (sig)
+      int v = 128;
+      foreach (var tone in tones.Values)
       {
-        case 1: return (byte)(Math.Sin(testWave * Math.PI * 2) * 20 + 128);
-        case 2: return (byte)((testWave < 0.5 ? testWave - 0.25 : 0.75 - testWave) * 80 + 128);
-        case 3: return (byte)((testWave - 0.5) * 40 + 128);
-        case 4: return (byte)((testWave < 0.5 ? 20 : -20) + 128);
-        default: return 128;
+        v += tone.Calc(mc);
       }
+
+      if (v < 0) v = 0;
+      if (v > 255) v = 255;
+      return (byte)v;
     }
 
     byte NextR()
     {
-      if (testWaveStep == 0) return (byte)(128 + rnd.Next(-3, 3));
+      uint mc = ((uint)micros) & 0xfffffffc;
 
-      switch (sig)
+      int v = rnd.Next(-3, 3) + 128;
+      v = 128;
+      foreach (var tone in tones.Values)
       {
-        case 1: return (byte)(Math.Sin(testWave * Math.PI * 2) * 20 + rnd.Next(-3, 3) + 128);
-        case 2: return (byte)((testWave < 0.5 ? testWave - 0.25 : 0.75 - testWave) * 80 + rnd.Next(-3, 3) + 128);
-        case 3: return (byte)((testWave - 0.5) * 40 + rnd.Next(-3, 3) + 128);
-        case 4: return (byte)((testWave < 0.5 ? 20 : -20) + rnd.Next(-3, 3) + 128);
-        default: return (byte)(128 + rnd.Next(-3, 3));
+        v += tone.Calc(mc);
       }
+
+      if (v < 0) v = 0;
+      if (v > 255) v = 255;
+      return (byte)v;
     }
 
     void ReadWave(byte[] buffer)
     {
-      if (midi != null)
+      var midiValue = midi.ReadValue();
+      if (midiValue.Valid)
       {
-        var midiValue = midi.ReadValue();
-        if (midiValue.Valid)
+        if ((midiValue.control & 0xf0) == 0x90)
         {
-          //Text = midiValue.ToString();
-          if ((midiValue.control & 0xf0) == 0x90)
+          if (!tones.ContainsKey(midiValue.note))
           {
-            testWaveStep = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 21)) * 13.75;
+            tones.Add(midiValue.note, new Tone((uint)micros, midiValue.note, (ToneType)sig));
           }
-          if ((midiValue.control & 0xf0) == 0x80)
-          {
-            var t = Math.Pow(2, 1.0 / 12.0 * (midiValue.note - 21)) * 13.75;
-            if (testWaveStep == t) testWaveStep = 0;
-          }
+        }
+        if ((midiValue.control & 0xf0) == 0x80)
+        {
+          if (tones.ContainsKey(midiValue.note)) tones.Remove(midiValue.note);
         }
       }
 
@@ -152,7 +154,6 @@ namespace arduino_audio
           xaSv.SubmitSourceBuffer(xaBuf);
         };
 
-        midi = new MidiInput();
         xaSv.Start();
         while (mainThread.IsAlive)
         {
@@ -255,9 +256,9 @@ namespace arduino_audio
       }
       else
       {
-        if (testWaveStep == 0) testWaveStep = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
-        if (e.Delta < 0) testWaveStep /= Math.Pow(2.0, 1.0 / 12.0);
-        if (e.Delta > 0) testWaveStep *= Math.Pow(2.0, 1.0 / 12.0);
+        //if (testWaveFreq == 0) testWaveFreq = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
+        //if (e.Delta < 0) testWaveFreq /= Math.Pow(2.0, 1.0 / 12.0);
+        //if (e.Delta > 0) testWaveFreq *= Math.Pow(2.0, 1.0 / 12.0);
       }
     }
 
@@ -274,7 +275,7 @@ namespace arduino_audio
       if (e.Button.HasFlag(MouseButtons.Left))
       {
         sig++;
-        if (sig == 5) sig = 1;
+        if (sig == 8) sig = 0;
       }
     }
 
@@ -311,61 +312,60 @@ namespace arduino_audio
     {
       // --- unten ---
 
-      { 0, 57 },         // A3 (capslock - german)
-      { Keys.A, 58 },    // A#3
-      { (Keys)226, 59 }, // B3 (less than - german)
-      { Keys.Y, 60 },    // C4
-      { Keys.S, 61 },    // C#4
-      { Keys.X, 62 },    // D4
-      { Keys.D, 63 },    // D#4
-      { Keys.C, 64 },    // E4
-      { Keys.V, 65 },    // F4
-      { Keys.G, 66 },    // F#4
-      { Keys.B, 67 },    // G4
-      { Keys.H, 68 },    // G#4
-      { Keys.N, 69 },    // A4
-      { Keys.J, 70 },    // A#4
-      { Keys.M, 71 },    // B4
-
-      { (Keys)188, 72 }, // C5 (comma - german)
-      { Keys.L, 73 },    // C#5
-      { (Keys)190, 74 }, // D5 (period - german)
-      { (Keys)192, 75 }, // D#5 (ö - german)
-      { (Keys)189, 76 }, // E5 (hyphen - german)
-      { (Keys)16, 77 },  // F5 (shift)
-      { (Keys)191, 78 }, // F#5 (# - german)
+      { 0, 45 },         // A2 (capslock - german)
+      { Keys.A, 46 },    // A#2
+      { (Keys)226, 47 }, // B2 (less than - german)
+      { Keys.Y, 48 },    // C3
+      { Keys.S, 49 },    // C#3
+      { Keys.X, 50 },    // D3
+      { Keys.D, 51 },    // D#3
+      { Keys.C, 52 },    // E3
+      { Keys.V, 53 },    // F3
+      { Keys.G, 54 },    // F#3
+      { Keys.B, 55 },    // G3
+      { Keys.H, 56 },    // G#3
+      { Keys.N, 57 },    // A3
+      { Keys.J, 58 },    // A#3
+      { Keys.M, 59 },    // B3
+      { (Keys)188, 60 }, // C4 (comma - german)
+      { Keys.L, 61 },    // C#4
+      { (Keys)190, 62 }, // D4 (period - german)
+      { (Keys)192, 63 }, // D#4 (ö - german)
+      { (Keys)189, 64 }, // E4 (hyphen - german)
+      { (Keys)16, 65 },  // F4 (shift)
+      { (Keys)191, 66 }, // F#4 (# - german)
 
       // --- oben ---
 
-      { (Keys)220, 70 }, // A#4  (tilde - german)
-      { Keys.Tab, 71 },  // B4
-      { Keys.Q, 72 },    // C5
-      { Keys.D2, 73 },   // C#5
-      { Keys.W, 74 },    // D5
-      { Keys.D3, 75 },   // D#5
-      { Keys.E, 76 },    // E5
-      { Keys.R, 77 },    // F5
-      { Keys.D5, 78 },   // F#5
-      { Keys.T, 79 },    // G5
-      { Keys.D6, 80 },   // G#5
-      { Keys.Z, 81 },    // A5
-      { Keys.D7, 82 },   // A#5
-      { Keys.U, 83 },    // B5
-      { Keys.I, 84 },    // C6
-      { Keys.D9, 85 },   // C#6
-      { Keys.O, 86 },    // D6
-      { Keys.D0, 87 },   // D#6
-      { Keys.P, 88 },    // E6
-      { (Keys)186, 89 }, // F6  (Ü - german)
-      { (Keys)221, 90 }, // F#6 (` - german)
-      { (Keys)187, 91 }, // G6  (+ - german)
-      { (Keys)8, 92 },   // G#6 (backspace)
-      { (Keys)13, 93 },  // A6  (return)
-      { (Keys)45, 94 },  // A#6 (insert)
-      { (Keys)46, 95 },  // B6  (del)
-      { (Keys)35, 96 },  // C7  (end)
-      { (Keys)33, 97 },  // C#7 (pageUp)
-      { (Keys)34, 98 },  // D7  (pageDown)
+      { (Keys)220, 58 }, // A#3  (tilde - german)
+      { Keys.Tab, 59 },  // B3
+      { Keys.Q, 60 },    // C4
+      { Keys.D2, 61 },   // C#4
+      { Keys.W, 62 },    // D4
+      { Keys.D3, 63 },   // D#4
+      { Keys.E, 64 },    // E4
+      { Keys.R, 65 },    // F4
+      { Keys.D5, 66 },   // F#4
+      { Keys.T, 67 },    // G4
+      { Keys.D6, 68 },   // G#4
+      { Keys.Z, 69 },    // A4
+      { Keys.D7, 70 },   // A#4
+      { Keys.U, 71 },    // B4
+      { Keys.I, 72 },    // C5
+      { Keys.D9, 73 },   // C#5
+      { Keys.O, 74 },    // D5
+      { Keys.D0, 75 },   // D#5
+      { Keys.P, 76 },    // E5
+      { (Keys)186, 77 }, // F5  (Ü - german)
+      { (Keys)221, 78 }, // F#5 (` - german)
+      { (Keys)187, 79 }, // G5  (+ - german)
+      { (Keys)8, 80 },   // G#5 (backspace)
+      { (Keys)13, 81 },  // A5  (return)
+      { (Keys)45, 82 },  // A#5 (insert)
+      { (Keys)46, 83 },  // B5  (del)
+      { (Keys)35, 84 },  // C6  (end)
+      { (Keys)33, 85 },  // C#6 (pageUp)
+      { (Keys)34, 86 },  // D6  (pageDown)
     };
 
     #endregion

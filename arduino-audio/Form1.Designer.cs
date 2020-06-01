@@ -65,7 +65,7 @@
       this.vScrollBar1.Name = "vScrollBar1";
       this.vScrollBar1.Size = new System.Drawing.Size(47, 499);
       this.vScrollBar1.TabIndex = 1;
-      this.vScrollBar1.Value = 5000;
+      this.vScrollBar1.Value = 12000;
       this.vScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.vScrollBar1_Scroll);
       // 
       // Form1
