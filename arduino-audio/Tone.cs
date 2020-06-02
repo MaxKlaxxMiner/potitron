@@ -21,7 +21,7 @@ namespace arduino_audio
     /// Anteil der Frequenz pro Mikrosekunde - z.B.
     /// 0x80000000 = eine Welle aller 2 Mikrosekunden = 500 Khz,
     /// 0x10000000 = eine Welle aller 16 Mikrosekunden = 62.5 KHz,
-    /// 0x00112559 = eine Welle aller 3822,26 Mikrosekunden = 261,6255 Hz = C6
+    /// 0x00112559 = eine Welle aller 3822,26 Mikrosekunden = 261,6255 Hz = C4
     /// </summary>
     public uint waveFracPerMicro;
 
