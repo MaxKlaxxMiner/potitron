@@ -86,8 +86,6 @@ namespace arduino_audio
 
         case ToneType.Square2DoubleTune:
         {
-          //double cent = Math.Pow(2, 1.0 / 12.0 * 0.1) / 1073741824UL;
-
           int v = volume / 2;
           double wavePos2 = (mOfs * 1067557526UL / (1073741824UL / 2) * waveFracPerMicro & uint.MaxValue) / (double)(1UL << 32);
           return (sbyte)((wavePos < 0.5 ? v : -v) + (wavePos2 < 0.5 ? v : -v));
@@ -95,8 +93,6 @@ namespace arduino_audio
 
         case ToneType.Square3DoubleTune:
         {
-          //double cent = Math.Pow(2, 1.0 / 12.0 * 0.1) / 1073741824UL;
-
           int v = volume / 2;
           double wavePos2 = (mOfs * 1070645210UL / (1073741824UL / 2) * waveFracPerMicro & uint.MaxValue) / (double)(1UL << 32);
           double wavePos3 = (mOfs * 1067557526UL / (1073741824UL / 4) * waveFracPerMicro & uint.MaxValue) / (double)(1UL << 32);
