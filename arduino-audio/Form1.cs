@@ -222,7 +222,7 @@ namespace arduino_audio
           {
             MidiUpdate();
           }
-          Thread.Sleep(1);
+          Thread.Sleep(0);
         }
         xaSv.Stop();
         xaSv.Dispose();

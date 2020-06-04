@@ -48,6 +48,7 @@ namespace arduino_audio
       this.volume = volume;
 
       double freq = Math.Pow(2, 1.0 / 12.0 * (midiNote - 21)) * 13.75;
+      //freq *= Math.Pow(2, 12.0 / 12.0);
       waveFracPerMicro = (uint)Math.Round(Math.Pow(2.0, 32.0) / (1000000.0 / freq));
     }
 
