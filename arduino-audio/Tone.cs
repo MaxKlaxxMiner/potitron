@@ -38,13 +38,13 @@ namespace arduino_audio
     /// <summary>
     /// merkt sich den Typ des Tones
     /// </summary>
-    public ToneType toneType;
+    public WaveType waveType;
 
-    public Tone(uint startMicros, byte midiNote, ToneType toneType = ToneType.Square, byte volume = 20)
+    public Tone(uint startMicros, byte midiNote, WaveType waveType = WaveType.Square, byte volume = 20)
     {
       this.startMicros = startMicros;
       this.midiNote = midiNote;
-      this.toneType = toneType;
+      this.waveType = waveType;
       this.volume = volume;
 
       double freq = Math.Pow(2, 1.0 / 12.0 * (midiNote - 21)) * 13.75;
@@ -63,35 +63,35 @@ namespace arduino_audio
       uint mOfs = micros - startMicros;
       double wavePos = ((ulong)mOfs * waveFracPerMicro & uint.MaxValue) / (double)(1UL << 32);
 
-      switch (toneType)
+      switch (waveType)
       {
-        case ToneType.Square: return (sbyte)(wavePos < 0.5 ? volume : -volume);
-        case ToneType.Triangle: return (sbyte)Math.Round((wavePos < 0.5 ? wavePos - 0.25 : 0.75 - wavePos) * (volume * 4));
-        case ToneType.Sine: return (sbyte)Math.Round(Math.Sin(wavePos * Math.PI * 2) * volume);
-        case ToneType.Saw: return (sbyte)Math.Round((wavePos - 0.5) * (volume * 2));
+        case WaveType.Square: return (sbyte)(wavePos < 0.5 ? volume : -volume);
+        case WaveType.Triangle: return (sbyte)Math.Round((wavePos < 0.5 ? wavePos - 0.25 : 0.75 - wavePos) * (volume * 4));
+        case WaveType.Sine: return (sbyte)Math.Round(Math.Sin(wavePos * Math.PI * 2) * volume);
+        case WaveType.Saw: return (sbyte)Math.Round((wavePos - 0.5) * (volume * 2));
 
-        case ToneType.Square2Tune:
+        case WaveType.Square2Tune:
         {
           int v = volume / 2;
           double wavePos2 = (mOfs * 1067557526UL / 1073741824UL * waveFracPerMicro & uint.MaxValue) / (double)(1UL << 32);
           return (sbyte)((wavePos < 0.5 ? v : -v) + (wavePos2 < 0.5 ? v : -v));
         }
 
-        case ToneType.Square2Double:
+        case WaveType.Square2Double:
         {
           int v = volume / 2;
           double wavePos2 = (mOfs * 2 * waveFracPerMicro & uint.MaxValue) / (double)(1UL << 32);
           return (sbyte)((wavePos < 0.5 ? v : -v) + (wavePos2 < 0.5 ? v : -v));
         }
 
-        case ToneType.Square2DoubleTune:
+        case WaveType.Square2DoubleTune:
         {
           int v = volume / 2;
           double wavePos2 = (mOfs * 1067557526UL / (1073741824UL / 2) * waveFracPerMicro & uint.MaxValue) / (double)(1UL << 32);
           return (sbyte)((wavePos < 0.5 ? v : -v) + (wavePos2 < 0.5 ? v : -v));
         }
 
-        case ToneType.Square3DoubleTune:
+        case WaveType.Square3DoubleTune:
         {
           int v = volume / 2;
           double wavePos2 = (mOfs * 1070645210UL / (1073741824UL / 2) * waveFracPerMicro & uint.MaxValue) / (double)(1UL << 32);

@@ -3,7 +3,7 @@
   /// <summary>
   /// Typ des Tones
   /// </summary>
-  public enum ToneType
+  public enum WaveType
   {
     /// <summary>
     /// einfacher Sinus-Ton

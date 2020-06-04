@@ -41,8 +41,68 @@ namespace arduino_audio
 
     Random rnd = new Random();
 
+    /// <summary>
+    /// aktueller Abspielzeit
+    /// </summary>
     double micros;
+    /// <summary>
+    /// Echo-Zeit in Microsekunden
+    /// </summary>
+    const uint EchoMicros = 170000; // 170 ms
+    /// <summary>
+    /// aktuell abgespielte Primär-Töne
+    /// </summary>
     Dictionary<byte, Tone> tones = new Dictionary<byte, Tone>();
+    /// <summary>
+    /// tatsächlich aktuell abgespielte Echo-Töne
+    /// </summary>
+    Dictionary<ushort, Tone> echoTones = new Dictionary<ushort, Tone>();
+    /// <summary>
+    /// Echo-Noten in der Reihenfolge, wie sie noch ausgelöst werden
+    /// </summary>
+    Queue<EchoNote> echoNotes = new Queue<EchoNote>();
+
+    void MidiUpdate()
+    {
+      var midiValue = midi.ReadValue();
+      if (midiValue.Valid)
+      {
+        if ((midiValue.control & 0xf0) == 0x90)
+        {
+          if (!tones.ContainsKey(midiValue.note))
+          {
+            tones.Add(midiValue.note, new Tone((uint)micros, midiValue.note, (WaveType)sig));
+            echoNotes.Enqueue(new EchoNote { note = midiValue.note, waveType = (WaveType)sig, volume = 10, startMicros = (uint)micros + EchoMicros });
+          }
+        }
+        if ((midiValue.control & 0xf0) == 0x80)
+        {
+          if (tones.ContainsKey(midiValue.note))
+          {
+            tones.Remove(midiValue.note);
+            echoNotes.Enqueue(new EchoNote { note = (byte)(midiValue.note | 0x80), waveType = (WaveType)sig, volume = 10, startMicros = (uint)micros + EchoMicros });
+          }
+        }
+      }
+
+      // --- Echos verarbeiten ---
+      for (; ; )
+      {
+        if (echoNotes.Count == 0) break; // keine Echos mehr vorhanden
+        if (echoNotes.Peek().startMicros > (uint)micros) break; // Echo wird noch nicht ausgelöst
+
+        var echoNote = echoNotes.Dequeue();
+        ushort key = (ushort)(echoNote.volume << 8 | echoNote.note & 0x7f);
+        if (echoNote.note < 128) // --- start Note ---
+        {
+          echoTones.Add(key, new Tone(echoNote.startMicros, echoNote.note, echoNote.waveType, echoNote.volume));
+        }
+        else // --- end Note ---
+        {
+          echoTones.Remove(key);
+        }
+      }
+    }
 
     int sig = 7;
 
@@ -53,6 +113,10 @@ namespace arduino_audio
 
       int v = 128;
       foreach (var tone in tones.Values)
+      {
+        v += tone.Calc(mc);
+      }
+      foreach (var tone in echoTones.Values)
       {
         v += tone.Calc(mc);
       }
@@ -72,6 +136,10 @@ namespace arduino_audio
       {
         v += tone.Calc(mc);
       }
+      foreach (var tone in echoTones.Values)
+      {
+        v += tone.Calc(mc);
+      }
 
       if (v < 0) v = 0;
       if (v > 255) v = 255;
@@ -80,21 +148,7 @@ namespace arduino_audio
 
     void ReadWave(byte[] buffer)
     {
-      var midiValue = midi.ReadValue();
-      if (midiValue.Valid)
-      {
-        if ((midiValue.control & 0xf0) == 0x90)
-        {
-          if (!tones.ContainsKey(midiValue.note))
-          {
-            tones.Add(midiValue.note, new Tone((uint)micros, midiValue.note, (ToneType)sig));
-          }
-        }
-        if ((midiValue.control & 0xf0) == 0x80)
-        {
-          if (tones.ContainsKey(midiValue.note)) tones.Remove(midiValue.note);
-        }
-      }
+      MidiUpdate();
 
       fixed (byte* bufferP = buffer)
       {
@@ -249,17 +303,8 @@ namespace arduino_audio
 
     void pictureBox1_MouseWheel(object sender, MouseEventArgs e)
     {
-      if (mouseR)
-      {
-        if (e.Delta < 0) zoom = Math.Max(1, zoom / 2);
-        if (e.Delta > 0) zoom = Math.Min(8192, zoom * 2);
-      }
-      else
-      {
-        //if (testWaveFreq == 0) testWaveFreq = 110.0 + Math.Pow(2.0, 3.0 / 12.0);
-        //if (e.Delta < 0) testWaveFreq /= Math.Pow(2.0, 1.0 / 12.0);
-        //if (e.Delta > 0) testWaveFreq *= Math.Pow(2.0, 1.0 / 12.0);
-      }
+      if (e.Delta < 0) zoom = Math.Max(1, zoom / 2);
+      if (e.Delta > 0) zoom = Math.Min(8192, zoom * 2);
     }
 
     void vScrollBar1_Scroll(object sender, ScrollEventArgs e)
