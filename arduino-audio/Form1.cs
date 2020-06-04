@@ -101,6 +101,12 @@ namespace arduino_audio
         {
           echoTones.Remove(key);
         }
+
+        // --- weitere Wiederholungen des Echos hinzufügen ---
+        if (echoNote.volume > 1)
+        {
+          echoNotes.Enqueue(new EchoNote { note = echoNote.note, waveType = echoNote.waveType, volume = (byte)(echoNote.volume / 2), startMicros = echoNote.startMicros + EchoMicros });
+        }
       }
     }
 
@@ -148,23 +154,24 @@ namespace arduino_audio
 
     void ReadWave(byte[] buffer)
     {
-      MidiUpdate();
-
-      fixed (byte* bufferP = buffer)
+      lock (tones)
       {
-        var samples = (short*)bufferP;
-        for (int i = 0; i < Samples * 2; i += 2)
+        fixed (byte* bufferP = buffer)
         {
-          int l = (NextL() - 128) * 255;
-          int r = (NextR() - 128) * 255;
+          var samples = (short*)bufferP;
+          for (int i = 0; i < Samples * 2; i += 2)
+          {
+            int l = (NextL() - 128) * 255;
+            int r = (NextR() - 128) * 255;
 
-          l = (short)filterL.Next(l);
-          r = (short)filterR.Next(r);
+            l = (short)filterL.Next(l);
+            r = (short)filterR.Next(r);
 
-          rollBufferL[rollBufferPos] = samples[i + 0] = (short)l;
-          rollBufferR[rollBufferPos] = samples[i + 1] = (short)r;
-          rollBufferPos++;
-          if (rollBufferPos == RollBufferSize) rollBufferPos = 0;
+            rollBufferL[rollBufferPos] = samples[i + 0] = (short)l;
+            rollBufferR[rollBufferPos] = samples[i + 1] = (short)r;
+            rollBufferPos++;
+            if (rollBufferPos == RollBufferSize) rollBufferPos = 0;
+          }
         }
       }
     }
@@ -211,6 +218,10 @@ namespace arduino_audio
         xaSv.Start();
         while (mainThread.IsAlive)
         {
+          lock (tones)
+          {
+            MidiUpdate();
+          }
           Thread.Sleep(1);
         }
         xaSv.Stop();
